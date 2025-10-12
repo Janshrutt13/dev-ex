@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { FaCode, FaUsers, FaFire } from 'react-icons/fa'; 
+ 
 
 const HomePage = () => {
   return (
