@@ -15,7 +15,7 @@ const SignupPage = () => {
       const response = await axios.post('http://localhost:5000/api/auth/signup', data);
       localStorage.setItem('token', response.data.token);
       toast.success('Account created successfully!');
-      router.push('/');
+      router.push('/feed');
     } catch (error: any) {
       toast.error(error?.response?.data?.message || 'An error occurred.');
     }

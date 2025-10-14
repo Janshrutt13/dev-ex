@@ -20,8 +20,8 @@ const LoginPage = () => {
       
       toast.success('Logged in successfully!');
       
-      // Redirect to the home page
-      router.push('/');
+      // Redirect to the feed page
+      router.push('/feed');
     } catch (error: any) {
       // Display an error message if login fails
       toast.error(error.response?.data?.message || 'Invalid credentials.');
