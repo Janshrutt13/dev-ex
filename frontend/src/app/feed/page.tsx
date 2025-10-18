@@ -30,6 +30,7 @@ import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
+import toast from "react-hot-toast"
 
 interface Post {
   id: string
@@ -49,6 +50,10 @@ interface Post {
   }
   hasLiked?: boolean
   codeSnippet?: string
+  hashtags?: string[]
+  imageUrl?: string
+  dayNumber?: number
+  totalDays?: number
 }
 
 interface Collab {
@@ -102,33 +107,68 @@ function PostCard({ post, onLike }: { post: Post; onLike: (id: string) => void }
         </button>
       </div>
 
-      <p className="text-foreground mb-4 leading-relaxed">{post.content}</p>
+      <p className="text-foreground leading-relaxed">{post.content}</p>
 
       {post.codeSnippet && (
-        <pre className="bg-muted/50 border border-border rounded-lg p-4 mb-4 overflow-x-auto">
+        <pre className="bg-muted/50 border border-border rounded-lg p-4 mt-4 overflow-x-auto">
           <code className="text-sm font-mono text-foreground">{post.codeSnippet}</code>
         </pre>
       )}
 
-      <div className="flex items-center gap-6 pt-4 border-t border-border">
-        <button
-          onClick={handleLike}
-          className={cn(
-            "flex items-center gap-2 text-sm transition-colors",
-            isLiked ? "text-red-500" : "text-muted-foreground hover:text-foreground"
-          )}
-        >
-          <Heart className={cn("w-5 h-5", isLiked && "fill-current")} />
-          <span>{post.reactions.likes + (isLiked && !post.hasLiked ? 1 : 0)}</span>
-        </button>
-        <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-          <Sparkles className="w-5 h-5" />
-          <span>{post.reactions.encourages}</span>
-        </button>
-        <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-          <MessageCircle className="w-5 h-5" />
-          <span>{post.reactions.comments}</span>
-        </button>
+      {/* Image at bottom */}
+      {post.imageUrl && (
+        <div className="mt-4">
+          <img 
+            src={post.imageUrl} 
+            alt="Post image" 
+            className="max-h-96 w-full object-cover rounded-lg border border-border"
+          />
+        </div>
+      )}
+
+      {/* Hashtags at bottom */}
+      {post.hashtags && post.hashtags.length > 0 && (
+        <div className="flex flex-wrap gap-2 mt-4">
+          {post.hashtags.map((tag, index) => (
+            <button
+              key={index}
+              className="text-blue-500 hover:text-blue-600 text-sm font-medium transition-colors"
+              onClick={() => console.log('Search hashtag:', tag)}
+            >
+              {tag}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div className="flex items-center justify-between pt-4 border-t border-border">
+        <div className="flex items-center gap-6">
+          <button
+            onClick={handleLike}
+            className={cn(
+              "flex items-center gap-2 text-sm transition-colors",
+              isLiked ? "text-red-500" : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Heart className={cn("w-5 h-5", isLiked && "fill-current")} />
+            <span>{post.reactions.likes + (isLiked && !post.hasLiked ? 1 : 0)}</span>
+          </button>
+          <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <Sparkles className="w-5 h-5" />
+            <span>{post.reactions.encourages}</span>
+          </button>
+          <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <MessageCircle className="w-5 h-5" />
+            <span>{post.reactions.comments}</span>
+          </button>
+        </div>
+        
+        {/* Challenge Badge */}
+        {post.dayNumber && post.totalDays && (
+          <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
+            Day {post.dayNumber}/{post.totalDays}
+          </div>
+        )}
       </div>
     </motion.div>
   )
@@ -184,101 +224,110 @@ export default function DevExPlatform() {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr_320px] gap-6 p-4 lg:p-6">
-          {/* Left Sidebar */}
-          <aside className="hidden lg:block">
-            <div className="sticky top-6 space-y-6">
-              <div className="flex items-center gap-3 mb-8">
-                <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-cyan-500 rounded-xl flex items-center justify-center">
-                  <Code2 className="w-6 h-6 text-white" />
-                </div>
-                <span className="text-2xl font-bold bg-gradient-to-r from-indigo-500 to-cyan-500 bg-clip-text text-transparent">
-                  Dev-Ex
-                </span>
-              </div>
-
-              <nav className="space-y-1">
-                <button
-                  onClick={() => setActiveTab("feed")}
-                  className={cn(
-                    "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200",
-                    activeTab === "feed"
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                  )}
-                >
-                  <Home className="w-5 h-5" />
-                  <span className="font-medium">Home</span>
-                </button>
-                <button
-                  onClick={() => setActiveTab("collabs")}
-                  className={cn(
-                    "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200",
-                    activeTab === "collabs"
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                  )}
-                >
-                  <Users className="w-5 h-5" />
-                  <span className="font-medium">Collabs</span>
-                </button>
-                <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200">
-                  <User className="w-5 h-5" />
-                  <span className="font-medium">Profile</span>
-                </button>
-                <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200">
-                  <Trophy className="w-5 h-5" />
-                  <span className="font-medium">Leaderboard</span>
-                </button>
-              </nav>
-
-              <div className="bg-gradient-to-br from-orange-500/10 to-red-500/10 border border-orange-500/20 rounded-2xl p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Flame className="w-5 h-5 text-orange-500" />
-                  <span className="font-semibold text-foreground">Current Streak</span>
-                </div>
-                <div className="text-3xl font-bold text-orange-500 mb-2">{currentStreak} days</div>
-                <p className="text-sm text-muted-foreground">Start your coding journey! 🚀</p>
-              </div>
-
-              <div className="space-y-2">
-                <button
-                  onClick={() => setFocusMode(!focusMode)}
-                  className={cn(
-                    "w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200",
-                    focusMode
-                      ? "bg-indigo-500/10 text-indigo-500 border border-indigo-500/20"
-                      : "bg-muted text-muted-foreground hover:bg-muted/80"
-                  )}
-                >
-                  <span className="font-medium">Focus Mode</span>
-                  <div className={cn(
-                    "w-10 h-6 rounded-full transition-colors relative",
-                    focusMode ? "bg-indigo-500" : "bg-muted-foreground/20"
-                  )}>
-                    <div className={cn(
-                      "absolute top-1 w-4 h-4 bg-white rounded-full transition-transform",
-                      focusMode ? "translate-x-5" : "translate-x-1"
-                    )} />
+        <div className="flex gap-6 p-4 lg:p-6">
+          {/* Collapsible Left Sidebar */}
+          <aside className="hidden lg:block group">
+            <div className="fixed left-0 top-0 h-full bg-background/80 backdrop-blur-md border-r border-border/50 transition-all duration-300 z-30 group-hover:w-80 w-16 overflow-hidden">
+              <div className="p-4 space-y-6">
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="w-8 h-8 bg-muted rounded-lg flex items-center justify-center min-w-8 cursor-pointer hover:bg-muted/80 transition-colors">
+                    <svg className="w-5 h-5 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
                   </div>
-                </button>
-                <div className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-muted transition-all duration-200">
-                  <span className="font-medium text-muted-foreground">Theme</span>
-                  <ThemeToggle 
-                    isDark={theme === "dark"} 
-                    onToggle={() => setTheme(theme === "dark" ? "light" : "dark")} 
-                  />
+
+                </div>
+
+                <nav className="space-y-1">
+                  <button
+                    onClick={() => setActiveTab("feed")}
+                    className={cn(
+                      "w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200",
+                      activeTab === "feed"
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    )}
+                  >
+                    <Home className="w-5 h-5 min-w-5" />
+                    <span className="font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">Home</span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("collabs")}
+                    className={cn(
+                      "w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200",
+                      activeTab === "collabs"
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    )}
+                  >
+                    <Users className="w-5 h-5 min-w-5" />
+                    <span className="font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">Collabs</span>
+                  </button>
+                  <button className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200">
+                    <User className="w-5 h-5 min-w-5" />
+                    <span className="font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">Profile</span>
+                  </button>
+                  <button className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200">
+                    <Trophy className="w-5 h-5 min-w-5" />
+                    <span className="font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">Leaderboard</span>
+                  </button>
+                </nav>
+
+                <div className="bg-gradient-to-br from-orange-500/10 to-red-500/10 border border-orange-500/20 rounded-2xl p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Flame className="w-5 h-5 text-orange-500" />
+                    <span className="font-semibold text-foreground whitespace-nowrap">Current Streak</span>
+                  </div>
+                  <div className="text-3xl font-bold text-orange-500 mb-2">{currentStreak} days</div>
+                  <p className="text-sm text-muted-foreground">Start your coding journey! 🚀</p>
+                </div>
+
+                <div className="space-y-2">
+                  <button
+                    onClick={() => setFocusMode(!focusMode)}
+                    className={cn(
+                      "w-full flex items-center justify-between px-3 py-3 rounded-xl transition-all duration-200",
+                      focusMode
+                        ? "bg-indigo-500/10 text-indigo-500 border border-indigo-500/20"
+                        : "bg-muted text-muted-foreground hover:bg-muted/80"
+                    )}
+                  >
+                    <span className="font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">Focus Mode</span>
+                    <div className={cn(
+                      "w-10 h-6 rounded-full transition-colors relative min-w-10",
+                      focusMode ? "bg-indigo-500" : "bg-muted-foreground/20"
+                    )}>
+                      <div className={cn(
+                        "absolute top-1 w-4 h-4 bg-white rounded-full transition-transform",
+                        focusMode ? "translate-x-5" : "translate-x-1"
+                      )} />
+                    </div>
+                  </button>
+                  <div className="w-full flex items-center justify-between px-3 py-3 rounded-xl bg-muted transition-all duration-200">
+                    <span className="font-medium text-muted-foreground whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">Theme</span>
+                    <ThemeToggle 
+                      isDark={theme === "dark"} 
+                      onToggle={() => setTheme(theme === "dark" ? "light" : "dark")} 
+                    />
+                  </div>
                 </div>
               </div>
             </div>
           </aside>
 
           {/* Main Feed */}
-          <main className="space-y-6">
+          <main className="flex-1 space-y-6 transition-all duration-300 group-hover:ml-64 ml-0 lg:ml-16">
             <div className="flex items-center justify-between">
-              <h1 className="text-2xl font-bold text-foreground">
-                {activeTab === "feed" ? "Daily Progress" : "Active Collaborations"}
-              </h1>
+              <div className="flex items-center gap-3">
+                <img 
+                  src={theme === "dark" ? "/logo_black.svg" : "/logo_white.svg"} 
+                  alt="Dev-Ex Logo" 
+                  className="h-24 w-auto"
+                />
+                <h1 className="text-2xl font-bold text-foreground">
+                  {activeTab === "feed" ? "" : "Active Collaborations"}
+                </h1>
+              </div>
               <div className="flex items-center gap-2">
                 <button className="p-2 hover:bg-muted rounded-full transition-colors">
                   <Search className="w-5 h-5 text-muted-foreground" />
@@ -298,7 +347,15 @@ export default function DevExPlatform() {
                     </div>
                     <h3 className="text-lg font-semibold text-foreground mb-2">No posts yet</h3>
                     <p className="text-muted-foreground mb-4">Be the first to share your coding progress!</p>
-                    <Button onClick={() => router.push('/feed/create')}>
+                    <Button onClick={() => {
+                      const token = localStorage.getItem('token');
+                      if (!token) {
+                        toast.error('Please signup to post');
+                        router.push('/signup');
+                        return;
+                      }
+                      router.push('/feed/create');
+                    }}>
                       <Plus className="w-4 h-4 mr-2" />
                       Create your first post
                     </Button>
@@ -333,7 +390,7 @@ export default function DevExPlatform() {
           </main>
 
           {/* Right Sidebar */}
-          <aside className="hidden lg:block">
+          <aside className="hidden lg:block w-80 flex-shrink-0">
             <div className="sticky top-6 space-y-6">
               <div className="bg-background border border-border rounded-2xl p-4">
                 <h3 className="font-semibold text-foreground mb-4">Trending Collabs</h3>
@@ -359,7 +416,15 @@ export default function DevExPlatform() {
 
       {/* Floating Action Button */}
       <motion.button
-        onClick={() => router.push('/feed/create')}
+        onClick={() => {
+          const token = localStorage.getItem('token');
+          if (!token) {
+            toast.error('Please signup to post');
+            router.push('/signup');
+            return;
+          }
+          router.push('/feed/create');
+        }}
         className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-br from-indigo-500 to-cyan-500 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center z-40"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}

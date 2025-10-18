@@ -9,6 +9,14 @@ const CollabProject = require('../models/collab.model');
 const createCollabProject = async( req : any , res : any) => {
     try{
 
+      const author = await User.findbyId(req.user.id);
+
+      if (!author || !author.githubUsername) {
+      return res.status(403).json({ 
+        message: 'You must link your GitHub profile to post a collaboration project.' 
+      });
+    }
+
        const {title , description , requiredSkills} = req.body;
 
        if(!title || !description || !requiredSkills){
@@ -65,6 +73,14 @@ const getAllCollabProjects = async(req : any , res : any) => {
 
 const joinCollabProject = async(req : any , res : any) => {
     try{
+
+      const author = await User.findbyId(req.user.id);
+
+      if (!author || !author.githubUsername) {
+      return res.status(403).json({ 
+        message: 'You must link your GitHub profile to join a collaboration project.' 
+      });
+    }
        
        const project = await CollabProject.findbyId(req.params.id);
        const userId = req.user._id;

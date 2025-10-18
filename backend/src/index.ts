@@ -3,6 +3,8 @@ const cors = require("cors")
 const express = require("express")
 const mongoose = require("mongoose")
 const authRoutes = require("./routes/auth.routes")
+const passport = require('passport');
+require('./config/passport'); // Import passport configuration
 
 dotenv.config()
 
@@ -12,6 +14,7 @@ const PORT = process.env.PORT || 5000;
 //MIDDLEWARES
 app.use(cors())
 app.use(express.json())
+app.use(passport.initialize());
 
 const mongoUri = process.env.MONGO_URI;
 mongoose.connect(mongoUri)
@@ -25,6 +28,7 @@ app.get("/" , (req : any,res : any) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/users" , require('./routes/user.routes'));
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`)

@@ -7,23 +7,70 @@ import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import toast from 'react-hot-toast';
 import axios from 'axios';
-import { X, Image, Code, Hash } from 'lucide-react';
+import { X, Image, Code, Hash, Upload, Tag } from 'lucide-react';
 
 export default function CreateFeedPage() {
   const router = useRouter();
   const [content, setContent] = useState('');
+  const [hashtags, setHashtags] = useState('');
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isPosting, setIsPosting] = useState(false);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Image size must be less than 5MB');
+        return;
+      }
+      setSelectedImage(file);
+      const reader = new FileReader();
+      reader.onload = () => setImagePreview(reader.result as string);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+  };
 
   const handlePost = async () => {
     if (!content.trim()) return;
     
+    const token = localStorage.getItem('token');
+    if (!token) {
+      toast.error('Please signup to post');
+      router.push('/signup');
+      return;
+    }
+    
     setIsPosting(true);
     try {
-      const token = localStorage.getItem('token');
+      const formData = new FormData();
+      formData.append('content', content);
+      
+      // Process hashtags
+      const hashtagArray = hashtags
+        .split(' ')
+        .filter(tag => tag.startsWith('#'))
+        .map(tag => tag.toLowerCase());
+      formData.append('hashtags', JSON.stringify(hashtagArray));
+      
+      if (selectedImage) {
+        formData.append('image', selectedImage);
+      }
+      
       await axios.post(
         'http://localhost:5000/api/logs',
-        { content },
-        { headers: { Authorization: `Bearer ${token}` } }
+        formData,
+        { 
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data'
+          } 
+        }
       );
       
       toast.success('Posted successfully!');
@@ -70,16 +117,46 @@ export default function CreateFeedPage() {
                 disabled={isPosting}
               />
               
+              {/* Hashtags input */}
+              <div className="flex items-center gap-2 mt-4">
+                <Tag className="w-4 h-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Add hashtags (e.g., #javascript #webdev)"
+                  value={hashtags}
+                  onChange={(e) => setHashtags(e.target.value)}
+                  className="flex-1 bg-transparent border-0 outline-none text-sm placeholder:text-muted-foreground/60"
+                  disabled={isPosting}
+                />
+              </div>
+              
+              {/* Image preview */}
+              {imagePreview && (
+                <div className="relative mt-4">
+                  <img src={imagePreview} alt="Preview" className="max-h-64 rounded-lg" />
+                  <button
+                    onClick={removeImage}
+                    className="absolute top-2 right-2 p-1 bg-black/50 text-white rounded-full hover:bg-black/70"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+              
               {/* Action buttons */}
               <div className="flex items-center gap-1 mt-4 pt-4 border-t border-border">
-                <button className="p-2 hover:bg-muted rounded-full text-muted-foreground transition-colors">
+                <label className="p-2 hover:bg-muted rounded-full text-muted-foreground transition-colors cursor-pointer">
                   <Image className="w-5 h-5" />
-                </button>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                    disabled={isPosting}
+                  />
+                </label>
                 <button className="p-2 hover:bg-muted rounded-full text-muted-foreground transition-colors">
                   <Code className="w-5 h-5" />
-                </button>
-                <button className="p-2 hover:bg-muted rounded-full text-muted-foreground transition-colors">
-                  <Hash className="w-5 h-5" />
                 </button>
               </div>
             </div>

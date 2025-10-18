@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Toaster } from "react-hot-toast"; // For notifications
-import { ThemeProvider } from "@/components/theme-component"; 
+
 import "./globals.css";
 
 
@@ -20,18 +20,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
           {/* Main content of the application */}
           {children}
           
           {/* Toaster component for displaying notifications globally */}
           <Toaster position="bottom-center" />
-        </ThemeProvider>
       </body>
     </html>
   );

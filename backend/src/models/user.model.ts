@@ -21,6 +21,25 @@ const UserSchema = new Schema({
         type : String,
         default : "/images/profilePic.png"
     },
+    githubId : {
+        type : String,
+        unique : true,
+        sparse : true
+    },
+    githubUsername : {
+        type : String,
+    },
+    profileImageUrl : {
+        type : String,
+        validate: {
+            validator: function(v 
+             :    any
+            ) {
+                return !v || /\.(jpg|jpeg|png|gif|webp)$/i.test(v);
+            },
+            message: 'Invalid image format'
+        }
+    },
     activeChallenge : {
         type : {
             type : String,

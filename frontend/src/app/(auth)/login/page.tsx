@@ -5,6 +5,8 @@ import axios from 'axios';
 import toast, { Toaster } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { FaGithub } from 'react-icons/fa';
 
 const LoginPage = () => {
   const router = useRouter();
@@ -67,6 +69,22 @@ const LoginPage = () => {
             {isSubmitting ? 'Logging In...' : 'Log In'}
           </button>
         </form>
+        <div className='relative my-4'>
+          <div className='absolute inset-0 flex items-center'>
+            <span className='w-full border-t' />
+          </div>
+          <div className='relative flex justify-center text-xs uppercase'>
+            <span className='bg-gray-800 px-2 text-muted-foreground'>
+              Or continue with
+            </span>
+          </div>
+        </div>
+        <a href='http://localhost:5000/api/auth/github'>
+          <Button variant='outline' className='w-full'>
+            <FaGithub className="mr-2 h-4 w-4" /> 
+            GitHub
+          </Button>
+        </a>
         <p className="text-sm text-center text-gray-400">
           Don't have an account?{' '}
           <Link href="/signup" className="font-medium text-blue-400 hover:underline">
