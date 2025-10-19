@@ -80,7 +80,7 @@ const LoginPage = () => {
           </div>
         </div>
         <a href='http://localhost:5000/api/auth/github'>
-          <Button variant='outline' className='w-full'>
+          <Button variant='default' className='w-full bg-gray-900 hover:bg-gray-800 text-white border-gray-700'>
             <FaGithub className="mr-2 h-4 w-4" /> 
             GitHub
           </Button>

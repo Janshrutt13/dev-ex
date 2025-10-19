@@ -5,8 +5,7 @@ const passport = require('passport');
 const GithubStrategy = require('passport-github').Strategy;
 const User = require('../models/user.model');
 
-console.log('CLIENT_ID:', process.env.CLIENT_ID);
-console.log('CLIENT_SECRET:', process.env.CLIENT_SECRET);
+
 
 passport.use(new GithubStrategy({
     clientID : process.env.CLIENT_ID,

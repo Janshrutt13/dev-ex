@@ -225,107 +225,14 @@ export default function DevExPlatform() {
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto">
         <div className="flex gap-6 p-4 lg:p-6">
-          {/* Collapsible Left Sidebar */}
-          <aside className="hidden lg:block group">
-            <div className="fixed left-0 top-0 h-full bg-background/80 backdrop-blur-md border-r border-border/50 transition-all duration-300 z-30 group-hover:w-80 w-16 overflow-hidden">
-              <div className="p-4 space-y-6">
-                <div className="flex items-center gap-3 mb-8">
-                  <div className="w-8 h-8 bg-muted rounded-lg flex items-center justify-center min-w-8 cursor-pointer hover:bg-muted/80 transition-colors">
-                    <svg className="w-5 h-5 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                  </div>
 
-                </div>
-
-                <nav className="space-y-1">
-                  <button
-                    onClick={() => setActiveTab("feed")}
-                    className={cn(
-                      "w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200",
-                      activeTab === "feed"
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                    )}
-                  >
-                    <Home className="w-5 h-5 min-w-5" />
-                    <span className="font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">Home</span>
-                  </button>
-                  <button
-                    onClick={() => setActiveTab("collabs")}
-                    className={cn(
-                      "w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200",
-                      activeTab === "collabs"
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                    )}
-                  >
-                    <Users className="w-5 h-5 min-w-5" />
-                    <span className="font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">Collabs</span>
-                  </button>
-                  <button className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200">
-                    <User className="w-5 h-5 min-w-5" />
-                    <span className="font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">Profile</span>
-                  </button>
-                  <button className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200">
-                    <Trophy className="w-5 h-5 min-w-5" />
-                    <span className="font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">Leaderboard</span>
-                  </button>
-                </nav>
-
-                <div className="bg-gradient-to-br from-orange-500/10 to-red-500/10 border border-orange-500/20 rounded-2xl p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Flame className="w-5 h-5 text-orange-500" />
-                    <span className="font-semibold text-foreground whitespace-nowrap">Current Streak</span>
-                  </div>
-                  <div className="text-3xl font-bold text-orange-500 mb-2">{currentStreak} days</div>
-                  <p className="text-sm text-muted-foreground">Start your coding journey! 🚀</p>
-                </div>
-
-                <div className="space-y-2">
-                  <button
-                    onClick={() => setFocusMode(!focusMode)}
-                    className={cn(
-                      "w-full flex items-center justify-between px-3 py-3 rounded-xl transition-all duration-200",
-                      focusMode
-                        ? "bg-indigo-500/10 text-indigo-500 border border-indigo-500/20"
-                        : "bg-muted text-muted-foreground hover:bg-muted/80"
-                    )}
-                  >
-                    <span className="font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">Focus Mode</span>
-                    <div className={cn(
-                      "w-10 h-6 rounded-full transition-colors relative min-w-10",
-                      focusMode ? "bg-indigo-500" : "bg-muted-foreground/20"
-                    )}>
-                      <div className={cn(
-                        "absolute top-1 w-4 h-4 bg-white rounded-full transition-transform",
-                        focusMode ? "translate-x-5" : "translate-x-1"
-                      )} />
-                    </div>
-                  </button>
-                  <div className="w-full flex items-center justify-between px-3 py-3 rounded-xl bg-muted transition-all duration-200">
-                    <span className="font-medium text-muted-foreground whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">Theme</span>
-                    <ThemeToggle 
-                      isDark={theme === "dark"} 
-                      onToggle={() => setTheme(theme === "dark" ? "light" : "dark")} 
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </aside>
 
           {/* Main Feed */}
-          <main className="flex-1 space-y-6 transition-all duration-300 group-hover:ml-64 ml-0 lg:ml-16">
+          <main className="flex-1 space-y-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <img 
-                  src={theme === "dark" ? "/logo_black.svg" : "/logo_white.svg"} 
-                  alt="Dev-Ex Logo" 
-                  className="h-24 w-auto"
-                />
                 <h1 className="text-2xl font-bold text-foreground">
-                  {activeTab === "feed" ? "" : "Active Collaborations"}
+                  {activeTab === "feed" ? "Feed" : "Active Collaborations"}
                 </h1>
               </div>
               <div className="flex items-center gap-2">

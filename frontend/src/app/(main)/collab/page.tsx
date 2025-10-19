@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Navbar } from "@/components/navbar";
+
 import { CollabPost } from "@/components/collab-post";
 import { Button } from "@/components/ui/button";
 import {
@@ -154,13 +154,12 @@ export default function CollabPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
       <main className="container mx-auto px-4 py-8">
         <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-12">
           <div className="text-center sm:text-left">
             <h1 className="text-4xl font-bold tracking-tight">Find a Project</h1>
             <p className="text-muted-foreground mt-2">
-              Join forces with other developers and build something amazing together.
+              Join Amazing projects or post your ideas for others to collaborate.
             </p>
           </div>
           <Button onClick={handleOpenModal} className="w-full sm:w-auto">
