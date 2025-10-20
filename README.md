@@ -13,7 +13,7 @@
 
 ## About
 
-Dev-Ex is a platform built for developers who want to stay consistent. Whether you're taking on a 75-day or 100-day coding challenge or just want to log your daily work, Dev-Ex helps you maintain your streak. It also features a dedicated section for finding project collaborators, gated by GitHub verification to ensure a community of genuine developers.
+Dev-Ex is a platform built for developers who want to stay consistent. Whether you're taking on a 75-day or 100-day coding challenge or just want to log your daily work, Dev-Ex helps you maintain your streak. It also features a dedicated section for finding project collaborators, where only verfied Github profiles can create or join collabs.
 
 ## ✨ Core Features
 
@@ -43,18 +43,6 @@ Dev-Ex is a platform built for developers who want to stay consistent. Whether y
 | | Passport.js (GitHub) | OAuth 2.0 for GitHub login |
 | | bcrypt.js | Password hashing |
 | **Containerization** | Docker & Docker Compose | Consistent development & production environment |
-
-## 🏁 Getting Started
-
-Follow these instructions to get a local copy up and running for development.
-
-### Prerequisites
-
-You must have the following software installed on your machine:
-
-- Node.js (v18 or later)
-- Git
-- Docker Desktop
 
 ### 1. Clone the Repository
 
