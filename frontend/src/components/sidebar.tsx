@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import axios from "axios";
 import {
   Tooltip,
   TooltipContent,
@@ -72,8 +73,41 @@ function NavLink({ href, icon: Icon, label, isCollapsed }: NavLinkProps) {
 // The main Sidebar component
 export function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [theme, setTheme] = useState<"light" | "dark">("dark");
+  const [theme, setTheme] = useState<"light" | "dark">(() => {
+    if (typeof window !== 'undefined') {
+      return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+    }
+    return 'dark';
+  });
+  const [currentUser, setCurrentUser] = useState<any>(null);
   const currentStreak = 0; // Empty for now
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        try {
+          const response = await axios.get("http://localhost:5000/api/users/me", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          setCurrentUser(response.data);
+        } catch (error) {
+          console.error("Failed to fetch user:", error);
+          setCurrentUser({ username: "Guest", email: "" });
+        }
+      } else {
+        setCurrentUser({ username: "Guest", email: "" });
+      }
+    };
+    fetchUser();
+
+    // Initialize theme from localStorage
+    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark';
+    if (savedTheme) {
+      setTheme(savedTheme);
+      document.documentElement.classList.toggle('dark', savedTheme === 'dark');
+    }
+  }, []);
 
   return (
     <div
@@ -129,16 +163,17 @@ export function Sidebar() {
               const newTheme = theme === "dark" ? "light" : "dark";
               setTheme(newTheme);
               document.documentElement.classList.toggle('dark', newTheme === 'dark');
+              localStorage.setItem('theme', newTheme);
             }}
           >
-            {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            <Sun className="h-5 w-5" />
             <span
               className={cn(
                 "ml-4 transition-all duration-300",
                 isCollapsed ? "opacity-0 w-0" : "opacity-100 w-auto"
               )}
             >
-              {theme === "dark" ? "Light Mode" : "Dark Mode"}
+              Toggle Theme
             </span>
           </Button>
         </div>
@@ -151,8 +186,8 @@ export function Sidebar() {
             <TooltipTrigger asChild>
               <div className="flex items-center gap-3 cursor-pointer">
                 <Avatar className="h-9 w-9">
-                  <AvatarImage src="/default-avatar.png" alt="User" />
-                  <AvatarFallback>U</AvatarFallback>
+                  <AvatarImage src={currentUser?.profileImageUrl || "/default-avatar.png"} alt="User" />
+                  <AvatarFallback>{currentUser?.username?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
                 </Avatar>
                 <div
                   className={cn(
@@ -160,17 +195,17 @@ export function Sidebar() {
                     isCollapsed ? "w-0 opacity-0" : "w-auto opacity-100"
                   )}
                 >
-                  <span className="text-sm font-medium truncate">Your Name</span>
+                  <span className="text-sm font-medium truncate">{currentUser?.username || "Loading..."}</span>
                   <span className="text-xs text-muted-foreground truncate">
-                    your@email.com
+                    {currentUser?.email || ""}
                   </span>
                 </div>
               </div>
             </TooltipTrigger>
             {isCollapsed && (
               <TooltipContent side="right">
-                <p>Your Name</p>
-                <p>your@email.com</p>
+                <p>{currentUser?.username || "Loading..."}</p>
+                <p>{currentUser?.email || ""}</p>
               </TooltipContent>
             )}
           </Tooltip>

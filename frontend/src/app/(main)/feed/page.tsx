@@ -31,6 +31,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
 import toast from "react-hot-toast"
+import axios from "axios"
 
 interface Post {
   id: string
@@ -64,8 +65,6 @@ interface Collab {
   description: string
 }
 
-// Empty arrays for now - will be populated with real data later
-const SAMPLE_POSTS: Post[] = []
 const SAMPLE_COLLABS: Collab[] = []
 
 function PostCard({ post, onLike }: { post: Post; onLike: (id: string) => void }) {
@@ -204,12 +203,55 @@ export default function DevExPlatform() {
   const router = useRouter()
   const [theme, setTheme] = useState<"light" | "dark">("dark")
   const [focusMode, setFocusMode] = useState(false)
-  const [posts, setPosts] = useState(SAMPLE_POSTS)
+  const [posts, setPosts] = useState<Post[]>([])
   const [activeTab, setActiveTab] = useState("feed")
+  const [isLoading, setIsLoading] = useState(true)
 
   React.useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark')
   }, [theme])
+
+  React.useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (token) {
+          const response = await axios.get('http://localhost:5000/api/logs', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          
+          // Transform backend data to match frontend interface
+          const transformedPosts = response.data.map((log: any) => ({
+            id: log._id,
+            user: {
+              name: log.author.username,
+              username: `@${log.author.username}`,
+              avatar: log.author.profileImageUrl || '/default-avatar.png'
+            },
+            challenge: 'Daily Log',
+            content: log.content,
+            streak: 0, // Will be updated when user streak is available
+            timestamp: new Date(log.createdAt).toLocaleDateString(),
+            reactions: {
+              likes: 0,
+              encourages: 0,
+              comments: 0
+            },
+            hashtags: log.tags || [],
+            imageUrl: log.imageUrl
+          }));
+          
+          setPosts(transformedPosts);
+        }
+      } catch (error) {
+        console.error('Failed to fetch posts:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchPosts();
+  }, []);
 
   const handleLike = (postId: string) => {
     setPosts(posts.map(post => 
@@ -247,7 +289,14 @@ export default function DevExPlatform() {
 
             {activeTab === "feed" ? (
               <div className="space-y-4">
-                {posts.length === 0 ? (
+                {isLoading ? (
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                      <MessageCircle className="w-8 h-8 text-muted-foreground animate-pulse" />
+                    </div>
+                    <p className="text-muted-foreground">Loading posts...</p>
+                  </div>
+                ) : posts.length === 0 ? (
                   <div className="text-center py-12">
                     <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
                       <MessageCircle className="w-8 h-8 text-muted-foreground" />

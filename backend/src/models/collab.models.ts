@@ -26,7 +26,11 @@ const CollabProjectSchema = new Schema({
     collaborators : [{
         type : Schema.Types.ObjectId,
         ref : "User"
-    }]
+    }],
+    url : {
+        type : String,
+        trim : true
+    }
 } , { timestamps : true });
 
-module.exports = mongoose.model("CollabProject", CollabProjectSchema);
+export default mongoose.model("CollabProject", CollabProjectSchema);

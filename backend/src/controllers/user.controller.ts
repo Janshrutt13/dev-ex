@@ -1,6 +1,4 @@
-export{};
-
-const User = require('../models/user.model');
+import User from '../models/user.model';
 
 /**
  * @desc    Get current logged-in user's profile
@@ -28,4 +26,4 @@ const getMe = async (req : any,res : any) => {
    }
 }
 
-module.exports = {getMe};
+export { getMe };

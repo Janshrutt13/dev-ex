@@ -15,7 +15,7 @@ declare global {
 }
 
 const generateToken = (id : any) => {
-   return jwt.sign({ id } , process.env.JWT_SECRET , {expiresIn : '30d'});
+   return jwt.sign({ id } , process.env.JWT_SECRET_KEY , {expiresIn : '30d'});
 }
 
 router.post("/signup" , [
@@ -36,11 +36,15 @@ router.get("/github" , passport.authenticate('github' , { scope : ['user : email
 router.get("/github/callback",
     passport.authenticate('github' , {failureRedirect : '/login' , session : false}),
     (req,res) => {
-        //Succesfull auth
-        const token = generateToken(req.user.id);
-        //Redirect to frontend page that handles token
-        res.redirect(`${process.env.FRONTEND_URL}/auth/callback?token=${token}`);
-
+        try {
+            //Successful auth
+            const token = generateToken(req.user._id);
+            //Redirect to frontend with token
+            res.redirect(`${process.env.FRONTEND_URL}?token=${token}`);
+        } catch (error) {
+            console.error('Auth callback error:', error);
+            res.redirect(`${process.env.FRONTEND_URL}/login?error=auth_failed`);
+        }
     }
 );
 

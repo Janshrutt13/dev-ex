@@ -3,14 +3,14 @@ export{};
 require('dotenv').config();
 const passport = require('passport');
 const GithubStrategy = require('passport-github').Strategy;
-const User = require('../models/user.model');
+import User from '../models/user.model';
 
 
 
 passport.use(new GithubStrategy({
     clientID : process.env.CLIENT_ID,
     clientSecret : process.env.CLIENT_SECRET,
-    callbackURL : "/api/auth/github/callback"
+    callbackURL : "http://localhost:5000/api/auth/github/callback"
 },
 async(accesstoken: string, _refreshtoken: string, profile: any, done: any) => {
     try{
@@ -25,10 +25,11 @@ async(accesstoken: string, _refreshtoken: string, profile: any, done: any) => {
         githubId : profile.id,
         githubUsername : profile.username,
         username : profile.displayName || profile.username,
-        email : profile.emails && profile.emails[0] ? profile.emails[0].value : null,
-        profileImageUrl : profile.photos[0].value
+        email : profile.emails && profile.emails[0] ? profile.emails[0].value : `${profile.username}@github.local`,
+        password: 'github-oauth' // Required field
       });
 
+      await newUser.save();
       return done(null,newUser);
 
     }catch(err){

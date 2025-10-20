@@ -1,4 +1,5 @@
-const CollabProject = require('../models/collab.model');
+import CollabProject from '../models/collab.models';
+import User from '../models/user.model';
 
 /**
  * @desc    Create a new collaboration project
@@ -9,7 +10,7 @@ const CollabProject = require('../models/collab.model');
 const createCollabProject = async( req : any , res : any) => {
     try{
 
-      const author = await User.findbyId(req.user.id);
+      const author = await User.findById(req.user.id);
 
       if (!author || !author.githubUsername) {
       return res.status(403).json({ 
@@ -28,7 +29,7 @@ const createCollabProject = async( req : any , res : any) => {
 
 
        const newProject = await CollabProject.create({
-          author : req.user._id,
+          author : req.user.id,
           title,
           description,
           requiredSkills : requiredSkills || []
@@ -53,7 +54,7 @@ const getAllCollabProjects = async(req : any , res : any) => {
     try{
         const collabs = await CollabProject.find({ status : 'OPEN'})
         .populate('author', 'username profileImageUrl')
-        .popuate('collaborators' , 'username profileImageUrl')
+        .populate('collaborators' , 'username profileImageUrl')
         .sort({ createdAt : -1});
 
 
@@ -74,7 +75,7 @@ const getAllCollabProjects = async(req : any , res : any) => {
 const joinCollabProject = async(req : any , res : any) => {
     try{
 
-      const author = await User.findbyId(req.user.id);
+      const author = await User.findById(req.user.id);
 
       if (!author || !author.githubUsername) {
       return res.status(403).json({ 
@@ -82,8 +83,8 @@ const joinCollabProject = async(req : any , res : any) => {
       });
     }
        
-       const project = await CollabProject.findbyId(req.params.id);
-       const userId = req.user._id;
+       const project = await CollabProject.findById(req.params.id);
+       const userId = req.user.id;
 
        if(!project){
          return res.status(404).json({ message : "Project not found"});
@@ -108,8 +109,8 @@ const joinCollabProject = async(req : any , res : any) => {
        project.collaborators.push(userId);
        await project.save();
 
-       const updatedProject = await CollabProject.findbyId('project._id')
-       .popuate('author' , 'username profileImageUrl')
+       const updatedProject = await CollabProject.findById(project._id)
+       .populate('author' , 'username profileImageUrl')
        .populate('collaborators', 'username profileImageUrl');
 
        res.status(200).json(updatedProject);
@@ -120,7 +121,7 @@ const joinCollabProject = async(req : any , res : any) => {
     }
 }
 
-module.exports = {
+export {
     createCollabProject,
     getAllCollabProjects,
     joinCollabProject

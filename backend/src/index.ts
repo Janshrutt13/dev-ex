@@ -29,6 +29,8 @@ app.get("/" , (req : any,res : any) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users" , require('./routes/user.routes'));
+app.use("/api/logs" , require('./routes/log.routes'));
+app.use("/api/collabs" , require('./routes/collab.routes').default);
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`)

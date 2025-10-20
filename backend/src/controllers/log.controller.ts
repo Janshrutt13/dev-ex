@@ -1,5 +1,5 @@
-const Log = require("../models/logs.model");
-const User = require("../models/user.model");
+const Log = require('../models/logs.model');
+import User from '../models/user.model';
 
 const IsSameDay = (date1 : any ,date2 : any) => {
   return date1.getFullYear() === date2.getFullYear() &&
@@ -17,21 +17,22 @@ const createLog = async(req : any,res : any) => {
    
    try{
      
-    const {content , tags } = req.body
-    const { authorId } = req.user.id //From Middleware
+    const content = req.body.content;
+    const hashtags = req.body.hashtags ? JSON.parse(req.body.hashtags) : [];
+    const authorId = req.user.id; //From Middleware
 
-    if(!content || !tags){
-        return res.status(400).json({message : "Please fill all the fields"})   
+    if(!content){
+        return res.status(400).json({message : "Content is required"})   
     }
 
     const newLog = await Log.create({
         author : authorId,
         content,
-        tags : tags || []
+        tags : hashtags
     });
 
     //Update user streak
-    const user = await User.findById({authorId});
+    const user = await User.findById(authorId);
     const LastLog = user?.streak && user.streak.length > 0 ? user.streak[user.streak.length - 1] : null;    
     const today = new Date();
 
@@ -65,4 +66,4 @@ const getLogs = async(req : any , res : any) => {
 
 }
 
-module.exports = { createLog , getLogs };
+export { createLog, getLogs };
