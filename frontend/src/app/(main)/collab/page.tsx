@@ -25,7 +25,7 @@ interface CollabProject {
   description: string;
   requiredSkills: string[];
   collaborators: User[];
-  status: "OPEN" | "CLOSED";
+  status: "open" | "closed" | "in progress";
   link?: string; // Add optional link
 }
 
@@ -118,7 +118,7 @@ export default function CollabPage() {
           </Button>
         </div>
         {projects.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="max-w-2xl mx-auto space-y-6">
             {projects.map((project) => (
               <CollabPost key={project._id} project={project} />
             ))}

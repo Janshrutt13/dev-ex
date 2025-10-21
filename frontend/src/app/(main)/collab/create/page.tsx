@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,6 +17,24 @@ export default function CreateCollabPage() {
   const [url, setUrl] = useState('');
   const [skills, setSkills] = useState('');
   const [isPosting, setIsPosting] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
+  React.useEffect(() => {
+    const fetchUser = async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const response = await axios.get('http://localhost:5000/api/users/me', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          setCurrentUser(response.data);
+        } catch (error) {
+          console.error('Failed to fetch user:', error);
+        }
+      }
+    };
+    fetchUser();
+  }, []);
 
   const handlePost = async () => {
     if (!title.trim() || !description.trim()) {
@@ -72,8 +90,8 @@ export default function CreateCollabPage() {
         <div className="p-4">
           <div className="flex gap-3">
             <Avatar className="w-12 h-12">
-              <AvatarImage src="" />
-              <AvatarFallback>U</AvatarFallback>
+              <AvatarImage src={currentUser?.profileImageUrl || ''} />
+              <AvatarFallback>{currentUser?.username?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
             </Avatar>
             <div className="flex-1 space-y-4">
               {/* Title */}

@@ -10,13 +10,7 @@ import User from '../models/user.model';
 const createCollabProject = async( req : any , res : any) => {
     try{
 
-      const author = await User.findById(req.user.id);
 
-      if (!author || !author.githubUsername) {
-      return res.status(403).json({ 
-        message: 'You must link your GitHub profile to post a collaboration project.' 
-      });
-    }
 
        const {title , description , requiredSkills} = req.body;
 
@@ -52,7 +46,7 @@ const createCollabProject = async( req : any , res : any) => {
 
 const getAllCollabProjects = async(req : any , res : any) => {
     try{
-        const collabs = await CollabProject.find({ status : 'OPEN'})
+        const collabs = await CollabProject.find({ status : 'open'})
         .populate('author', 'username profileImageUrl')
         .populate('collaborators' , 'username profileImageUrl')
         .sort({ createdAt : -1});
@@ -75,13 +69,7 @@ const getAllCollabProjects = async(req : any , res : any) => {
 const joinCollabProject = async(req : any , res : any) => {
     try{
 
-      const author = await User.findById(req.user.id);
 
-      if (!author || !author.githubUsername) {
-      return res.status(403).json({ 
-        message: 'You must link your GitHub profile to join a collaboration project.' 
-      });
-    }
        
        const project = await CollabProject.findById(req.params.id);
        const userId = req.user.id;
@@ -91,7 +79,7 @@ const joinCollabProject = async(req : any , res : any) => {
        }
 
        //If project is not open you cannot contribute
-       if(project.status !== 'OPEN'){
+       if(project.status !== 'open'){
          return res.status(400).json({ message : "Project is not open for collaboration"});
        }
 

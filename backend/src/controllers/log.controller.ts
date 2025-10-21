@@ -54,7 +54,7 @@ const getLogs = async(req : any , res : any) => {
     try{
 
         const Logs = await Log.find()
-        .populate('author' , 'username profileImageUrl')
+        .populate('author' , 'username profileImageUrl streak')
         .sort({ createdAt : -1 }) // get latest logs
         .limit(50);
           

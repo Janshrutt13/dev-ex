@@ -13,6 +13,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import {
   Home,
   Users,
@@ -21,8 +22,6 @@ import {
   PanelLeftOpen,
   User,
   Flame,
-  Moon,
-  Sun,
 } from "lucide-react";
 
 // Define the properties for a navigation link
@@ -79,8 +78,9 @@ export function Sidebar() {
     }
     return 'dark';
   });
-  const [currentUser, setCurrentUser] = useState<any>(null);
-  const currentStreak = 0; // Empty for now
+  const [currentUser, setCurrentUser] = useState<any>({ username: "Guest", email: "" });
+  const [currentStreak, setCurrentStreak] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -91,13 +91,17 @@ export function Sidebar() {
             headers: { Authorization: `Bearer ${token}` },
           });
           setCurrentUser(response.data);
+          setCurrentStreak(response.data.currentStreak || 0);
         } catch (error) {
           console.error("Failed to fetch user:", error);
+          localStorage.removeItem("token");
           setCurrentUser({ username: "Guest", email: "" });
+          setCurrentStreak(0);
         }
       } else {
         setCurrentUser({ username: "Guest", email: "" });
       }
+      setIsLoading(false);
     };
     fetchUser();
 
@@ -155,27 +159,24 @@ export function Sidebar() {
         )}
         
         {/* --- Theme Toggle --- */}
-        <div className="mt-4">
-          <Button
-            variant="ghost"
-            className="w-full justify-start h-10"
-            onClick={() => {
+        <div className="mt-4 flex items-center gap-3">
+          <ThemeToggle 
+            isDark={theme === 'dark'} 
+            onToggle={() => {
               const newTheme = theme === "dark" ? "light" : "dark";
               setTheme(newTheme);
               document.documentElement.classList.toggle('dark', newTheme === 'dark');
               localStorage.setItem('theme', newTheme);
             }}
+          />
+          <span
+            className={cn(
+              "text-sm font-medium transition-all duration-300",
+              isCollapsed ? "opacity-0 w-0" : "opacity-100 w-auto"
+            )}
           >
-            <Sun className="h-5 w-5" />
-            <span
-              className={cn(
-                "ml-4 transition-all duration-300",
-                isCollapsed ? "opacity-0 w-0" : "opacity-100 w-auto"
-              )}
-            >
-              Toggle Theme
-            </span>
-          </Button>
+            {theme === 'dark' ? 'Dark' : 'Light'} Mode
+          </span>
         </div>
       </nav>
 
@@ -195,7 +196,7 @@ export function Sidebar() {
                     isCollapsed ? "w-0 opacity-0" : "w-auto opacity-100"
                   )}
                 >
-                  <span className="text-sm font-medium truncate">{currentUser?.username || "Loading..."}</span>
+                  <span className="text-sm font-medium truncate">{isLoading ? "Loading..." : currentUser?.username}</span>
                   <span className="text-xs text-muted-foreground truncate">
                     {currentUser?.email || ""}
                   </span>
@@ -204,7 +205,7 @@ export function Sidebar() {
             </TooltipTrigger>
             {isCollapsed && (
               <TooltipContent side="right">
-                <p>{currentUser?.username || "Loading..."}</p>
+                <p>{isLoading ? "Loading..." : currentUser?.username}</p>
                 <p>{currentUser?.email || ""}</p>
               </TooltipContent>
             )}

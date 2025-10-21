@@ -21,7 +21,7 @@ Dev-Ex is a platform built for developers who want to stay consistent. Whether y
 - **Coding Challenges**: Commit to a 75 or 100-day challenge and let the app help you track your streak
 - **Streak Tracking**: A custom-built streak calculation engine motivates you to log your progress every day
 - **Collaboration Hub**: Post your project ideas or find existing projects to join
-- **GitHub-Gated Content**: Only users who have linked their GitHub profile can post or join collaborations, ensuring a high-quality community
+- **Open Collaboration**: All registered users can post and join collaboration projects
 - **Secure Authentication**: Full authentication flow with JWT (email/password) and OAuth 2.0 (GitHub)
 - **Modern UI/UX**: A sleek, collapsible sidebar layout built with shadcn/ui and Tailwind CSS
 - **Dark & Light Mode**: Seamless theme switching based on your system preference or manual toggle
@@ -171,7 +171,7 @@ dev-ex/
 | POST | `/api/logs` | Private | Create a new log post and update streak |
 | **Collabs** |
 | GET | `/api/collabs` | Public | Get all "OPEN" collaboration projects |
-| POST | `/api/collabs` | Private | Create a new project (requires linked GitHub) |
+| POST | `/api/collabs` | Private | Create a new project |
 | PATCH | `/api/collabs/:id/join` | Private | Join an open collaboration project |
 
 ## 🗺️ Future Roadmap

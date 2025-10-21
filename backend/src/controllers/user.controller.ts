@@ -1,4 +1,5 @@
 import User from '../models/user.model';
+const { CalculateStreak, calculateLongestStreak } = require('../utils/streak.utils');
 
 /**
  * @desc    Get current logged-in user's profile
@@ -16,7 +17,16 @@ const getMe = async (req : any,res : any) => {
      return res.status(400).json({ message : 'User not found!'})
    }
 
-   res.json(user);
+   const currentStreak = CalculateStreak(user.streak) || 0;
+   const longestStreak = calculateLongestStreak(user.streak) || 0; 
+
+   const userObject = user.toObject();
+
+   res.json({
+    ...userObject,
+    currentStreak,
+    longestStreak
+   });
 
    }catch(err){
      console.error(err);

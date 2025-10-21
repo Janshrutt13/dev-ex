@@ -7,6 +7,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { CollabChat } from "@/components/collab-chat";
+import { MessageCircle } from "lucide-react";
+import { useState, useEffect } from "react";
 
 // --- TypeScript Interface for our Collab Project data ---
 interface User {
@@ -22,11 +26,32 @@ interface CollabProject {
   description: string;
   requiredSkills: string[];
   collaborators: User[];
-  status: 'OPEN' | 'CLOSED';
+  status: 'open' | 'closed' | 'in progress';
 }
 
 export function CollabPost({ project }: { project: CollabProject }) {
   const router = useRouter();
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [isJoined, setIsJoined] = useState(false);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        try {
+          const response = await axios.get("http://localhost:5000/api/users/me", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          setCurrentUser(response.data);
+          // Check if current user is already a collaborator
+          setIsJoined(project.collaborators.some(collab => collab._id === response.data._id));
+        } catch (error) {
+          console.error("Failed to fetch user:", error);
+        }
+      }
+    };
+    fetchUser();
+  }, [project.collaborators]);
 
   const handleJoin = async () => {
     try {
@@ -86,7 +111,26 @@ export function CollabPost({ project }: { project: CollabProject }) {
                 <Badge key={skill} variant="secondary">{skill}</Badge>
             ))}
         </div>
-        <Button onClick={handleJoin} className="w-full">Join Project</Button>
+        <div className="flex gap-2 w-full">
+          <Button onClick={handleJoin} className="flex-1">Join Project</Button>
+          {(isJoined || project.author._id === currentUser?._id) && (
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <MessageCircle className="h-4 w-4" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Project Chat - {project.title}</DialogTitle>
+                </DialogHeader>
+                {currentUser && (
+                  <CollabChat collabId={project._id} currentUser={currentUser} />
+                )}
+              </DialogContent>
+            </Dialog>
+          )}
+        </div>
       </CardFooter>
     </Card>
   );

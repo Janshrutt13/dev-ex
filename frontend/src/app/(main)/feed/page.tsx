@@ -82,11 +82,10 @@ function PostCard({ post, onLike }: { post: Post; onLike: (id: string) => void }
       className="bg-background border border-border rounded-2xl p-6 hover:border-primary/20 transition-all duration-300"
     >
       <div className="flex items-start gap-3 mb-4">
-        <img
-          src={post.user.avatar}
-          alt={post.user.name}
-          className="w-12 h-12 rounded-full object-cover"
-        />
+        <Avatar className="w-12 h-12">
+          <AvatarImage src={post.user.avatar} alt={post.user.name} />
+          <AvatarFallback>{post.user.name?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
+        </Avatar>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-semibold text-foreground">{post.user.name}</span>
@@ -230,7 +229,7 @@ export default function DevExPlatform() {
             },
             challenge: 'Daily Log',
             content: log.content,
-            streak: 0, // Will be updated when user streak is available
+            streak: log.author.streak ? log.author.streak.length : 0,
             timestamp: new Date(log.createdAt).toLocaleDateString(),
             reactions: {
               likes: 0,
@@ -270,12 +269,10 @@ export default function DevExPlatform() {
 
 
           {/* Main Feed */}
-          <main className="flex-1 space-y-6">
+          <main className="max-w-2xl mx-auto space-y-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-bold text-foreground">
-                  {activeTab === "feed" ? "Feed" : "Active Collaborations"}
-                </h1>
+                <h1 className="text-2xl font-bold text-foreground">Feed</h1>
               </div>
               <div className="flex items-center gap-2">
                 <button className="p-2 hover:bg-muted rounded-full transition-colors">
@@ -287,86 +284,43 @@ export default function DevExPlatform() {
               </div>
             </div>
 
-            {activeTab === "feed" ? (
-              <div className="space-y-4">
-                {isLoading ? (
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                      <MessageCircle className="w-8 h-8 text-muted-foreground animate-pulse" />
-                    </div>
-                    <p className="text-muted-foreground">Loading posts...</p>
+            <div className="space-y-6">
+              {isLoading ? (
+                <div className="text-center py-12">
+                  <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                    <MessageCircle className="w-8 h-8 text-muted-foreground animate-pulse" />
                   </div>
-                ) : posts.length === 0 ? (
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                      <MessageCircle className="w-8 h-8 text-muted-foreground" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-foreground mb-2">No posts yet</h3>
-                    <p className="text-muted-foreground mb-4">Be the first to share your coding progress!</p>
-                    <Button onClick={() => {
-                      const token = localStorage.getItem('token');
-                      if (!token) {
-                        toast.error('Please signup to post');
-                        router.push('/signup');
-                        return;
-                      }
-                      router.push('/feed/create');
-                    }}>
-                      <Plus className="w-4 h-4 mr-2" />
-                      Create your first post
-                    </Button>
+                  <p className="text-muted-foreground">Loading posts...</p>
+                </div>
+              ) : posts.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                    <MessageCircle className="w-8 h-8 text-muted-foreground" />
                   </div>
-                ) : (
-                  posts.map((post) => (
-                    <PostCard key={post.id} post={post} onLike={handleLike} />
-                  ))
-                )}
-              </div>
-            ) : (
-              <div className="grid gap-4">
-                {SAMPLE_COLLABS.length === 0 ? (
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Users className="w-8 h-8 text-muted-foreground" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-foreground mb-2">No collaborations yet</h3>
-                    <p className="text-muted-foreground mb-4">Start collaborating with other developers!</p>
-                    <Button>
-                      <Plus className="w-4 h-4 mr-2" />
-                      Create collaboration
-                    </Button>
-                  </div>
-                ) : (
-                  SAMPLE_COLLABS.map((collab) => (
-                    <CollabCard key={collab.id} collab={collab} />
-                  ))
-                )}
-              </div>
-            )}
+                  <h3 className="text-lg font-semibold text-foreground mb-2">No posts yet</h3>
+                  <p className="text-muted-foreground mb-4">Be the first to share your coding progress!</p>
+                  <Button onClick={() => {
+                    const token = localStorage.getItem('token');
+                    if (!token) {
+                      toast.error('Please signup to post');
+                      router.push('/signup');
+                      return;
+                    }
+                    router.push('/feed/create');
+                  }}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create your first post
+                  </Button>
+                </div>
+              ) : (
+                posts.map((post) => (
+                  <PostCard key={post.id} post={post} onLike={handleLike} />
+                ))
+              )}
+            </div>
           </main>
 
-          {/* Right Sidebar */}
-          <aside className="hidden lg:block w-80 flex-shrink-0">
-            <div className="sticky top-6 space-y-6">
-              <div className="bg-background border border-border rounded-2xl p-4">
-                <h3 className="font-semibold text-foreground mb-4">Trending Collabs</h3>
-                <div className="space-y-3">
-                  {SAMPLE_COLLABS.length === 0 ? (
-                    <div className="text-center py-6">
-                      <Users className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                      <p className="text-sm text-muted-foreground">No collaborations yet</p>
-                    </div>
-                  ) : (
-                    SAMPLE_COLLABS.slice(0, 2).map((collab) => (
-                      <CollabCard key={collab.id} collab={collab} />
-                    ))
-                  )}
-                </div>
-              </div>
 
-
-            </div>
-          </aside>
         </div>
       </div>
 
