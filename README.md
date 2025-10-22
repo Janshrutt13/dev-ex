@@ -13,7 +13,7 @@
 
 ## About
 
-Dev-Ex is a platform built for developers who want to stay consistent. Whether you're taking on a 75-day or 100-day coding challenge or just want to log your daily work, Dev-Ex helps you maintain your streak. It also features a dedicated section for finding project collaborators, where only verfied Github profiles can create or join collabs.
+Dev-Ex is a platform built for developers who want to stay consistent. Whether you're taking on a 75-day or 100-day coding challenge or just want to log your daily work, Dev-Ex helps you maintain your streak. It also features a dedicated section for finding project collaborators.
 
 ## ✨ Core Features
 
