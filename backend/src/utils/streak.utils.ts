@@ -20,29 +20,40 @@ const yesterdayDate = () => {
  */
 
 function CalculateStreak(streakDates : any){
-    let streak = 0;
-    if(streakDates.length === 0){
+    if(!streakDates || streakDates.length === 0){
         return 0;
     }
 
     const today = new Date();
-    const yesterday = yesterdayDate();
+    today.setHours(0, 0, 0, 0);
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
 
-    const lastLogDate = streakDates[streakDates.length - 1];
+    const lastLogDate = new Date(streakDates[streakDates.length - 1]);
+    lastLogDate.setHours(0, 0, 0, 0);
 
-    //Set starting points
-    let expectedDate = isSameDay(lastLogDate,today) ? today : yesterday;
+    // If last log is not today or yesterday, streak is broken
+    if (!isSameDay(lastLogDate, today) && !isSameDay(lastLogDate, yesterday)) {
+        return 0;
+    }
 
-    for(const date of streakDates){
-        if(isSameDay(date,expectedDate)){
-            streak++
-            //set expected date to a day before
+    let streak = 0;
+    let expectedDate = new Date(lastLogDate);
+
+    // Count backwards from most recent date
+    for(let i = streakDates.length - 1; i >= 0; i--){
+        const currentDate = new Date(streakDates[i]);
+        currentDate.setHours(0, 0, 0, 0);
+        
+        if(isSameDay(currentDate, expectedDate)){
+            streak++;
             expectedDate.setDate(expectedDate.getDate() - 1);
-        }
-        else{
+        } else {
             break;
         }
-    } 
+    }
+    
+    return streak;
 }
 
 const isNextDay = (date1 : any, date2 : any) => {

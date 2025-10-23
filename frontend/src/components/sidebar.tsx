@@ -105,6 +105,16 @@ export function Sidebar() {
     };
     fetchUser();
 
+    // Listen for storage changes to update user state
+    const handleStorageChange = () => {
+      fetchUser();
+    };
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+
     // Initialize theme from localStorage
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark';
     if (savedTheme) {
@@ -144,7 +154,7 @@ export function Sidebar() {
       <nav className="flex-grow p-4 space-y-2">
         <NavLink href="/feed" icon={Home} label="Feed" isCollapsed={isCollapsed} />
         <NavLink href="/collab" icon={Users} label="Collab" isCollapsed={isCollapsed} />
-        <NavLink href="/profile" icon={User} label="Profile" isCollapsed={isCollapsed} />
+        <NavLink href={currentUser?.username ? `/profile/${currentUser.username}` : "/profile"} icon={User} label="Profile" isCollapsed={isCollapsed} />
         
         {/* --- Streak Display --- */}
         {!isCollapsed && (
@@ -160,15 +170,17 @@ export function Sidebar() {
         
         {/* --- Theme Toggle --- */}
         <div className="mt-4 flex items-center gap-3">
-          <ThemeToggle 
-            isDark={theme === 'dark'} 
-            onToggle={() => {
-              const newTheme = theme === "dark" ? "light" : "dark";
-              setTheme(newTheme);
-              document.documentElement.classList.toggle('dark', newTheme === 'dark');
-              localStorage.setItem('theme', newTheme);
-            }}
-          />
+          {typeof window !== 'undefined' && (
+            <ThemeToggle 
+              isDark={theme === 'dark'} 
+              onToggle={() => {
+                const newTheme = theme === "dark" ? "light" : "dark";
+                setTheme(newTheme);
+                document.documentElement.classList.toggle('dark', newTheme === 'dark');
+                localStorage.setItem('theme', newTheme);
+              }}
+            />
+          )}
           <span
             className={cn(
               "text-sm font-medium transition-all duration-300",

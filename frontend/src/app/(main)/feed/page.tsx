@@ -22,6 +22,7 @@ import {
   Send,
   Sparkles,
   X,
+  Trash2,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -39,6 +40,7 @@ interface Post {
     name: string
     username: string
     avatar: string
+    id?: string
   }
   challenge: string
   content: string
@@ -67,12 +69,19 @@ interface Collab {
 
 const SAMPLE_COLLABS: Collab[] = []
 
-function PostCard({ post, onLike }: { post: Post; onLike: (id: string) => void }) {
+function PostCard({ post, onLike, onDelete, currentUserId }: { post: Post; onLike: (id: string) => void; onDelete: (id: string) => void; currentUserId?: string }) {
   const [isLiked, setIsLiked] = useState(post.hasLiked || false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const handleLike = () => {
     setIsLiked(!isLiked)
     onLike(post.id)
+  }
+
+  const handleDelete = async () => {
+    if (!confirm('Are you sure you want to delete this post?')) return;
+    setIsDeleting(true);
+    await onDelete(post.id);
   }
 
   return (
@@ -100,9 +109,17 @@ function PostCard({ post, onLike }: { post: Post; onLike: (id: string) => void }
             <span className="text-sm text-muted-foreground">• {post.timestamp}</span>
           </div>
         </div>
-        <button className="p-2 hover:bg-muted rounded-full transition-colors">
-          <MoreHorizontal className="w-5 h-5 text-muted-foreground" />
-        </button>
+        {currentUserId === post.user.id && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleDelete}
+            disabled={isDeleting}
+            className="text-destructive hover:text-destructive"
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
+        )}
       </div>
 
       <p className="text-foreground leading-relaxed">{post.content}</p>
@@ -205,6 +222,7 @@ export default function DevExPlatform() {
   const [posts, setPosts] = useState<Post[]>([])
   const [activeTab, setActiveTab] = useState("feed")
   const [isLoading, setIsLoading] = useState(true)
+  const [currentUserId, setCurrentUserId] = useState<string | undefined>()
 
   React.useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark')
@@ -215,14 +233,22 @@ export default function DevExPlatform() {
       try {
         const token = localStorage.getItem('token');
         if (token) {
-          const response = await axios.get('http://localhost:5000/api/logs', {
-            headers: { Authorization: `Bearer ${token}` }
-          });
+          const [logsResponse, userResponse] = await Promise.all([
+            axios.get('http://localhost:5000/api/logs', {
+              headers: { Authorization: `Bearer ${token}` }
+            }),
+            axios.get('http://localhost:5000/api/users/me', {
+              headers: { Authorization: `Bearer ${token}` }
+            })
+          ]);
+          
+          setCurrentUserId(userResponse.data._id);
           
           // Transform backend data to match frontend interface
-          const transformedPosts = response.data.map((log: any) => ({
+          const transformedPosts = logsResponse.data.map((log: any) => ({
             id: log._id,
             user: {
+              id: log.author._id,
               name: log.author.username,
               username: `@${log.author.username}`,
               avatar: log.author.profileImageUrl || '/default-avatar.png'
@@ -258,6 +284,20 @@ export default function DevExPlatform() {
         ? { ...post, hasLiked: !post.hasLiked }
         : post
     ))
+  }
+
+  const handleDelete = async (postId: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(`http://localhost:5000/api/logs/${postId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setPosts(posts.filter(post => post.id !== postId));
+      toast.success('Post deleted successfully!');
+    } catch (error) {
+      toast.error('Failed to delete post');
+      console.error('Delete error:', error);
+    }
   }
 
   const currentStreak = 0 // Empty for now
@@ -314,7 +354,7 @@ export default function DevExPlatform() {
                 </div>
               ) : (
                 posts.map((post) => (
-                  <PostCard key={post.id} post={post} onLike={handleLike} />
+                  <PostCard key={post.id} post={post} onLike={handleLike} onDelete={handleDelete} currentUserId={currentUserId} />
                 ))
               )}
             </div>

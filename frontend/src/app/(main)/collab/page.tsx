@@ -120,7 +120,11 @@ export default function CollabPage() {
         {projects.length > 0 ? (
           <div className="max-w-2xl mx-auto space-y-6">
             {projects.map((project) => (
-              <CollabPost key={project._id} project={project} />
+              <CollabPost 
+                key={project._id} 
+                project={project} 
+                onDelete={(id) => setProjects(projects.filter(p => p._id !== id))}
+              />
             ))}
           </div>
         ) : (

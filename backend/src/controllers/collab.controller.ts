@@ -109,8 +109,31 @@ const joinCollabProject = async(req : any , res : any) => {
     }
 }
 
+const deleteCollab = async(req : any , res : any) => {
+   try{
+       
+      const project = await CollabProject.findById(req.params.id);
+      
+      if(!project){
+        return res.status(404).json({ message : "Collab post not found"});
+      }
+
+      if(project.author.toString() !== req.user.id){
+        return res.status(401).json({ message : "Unauthorized User"});
+      }
+
+      await CollabProject.findByIdAndDelete(req.params.id);
+      res.status(200).json({ message : "Collab post deleted successfully"});
+
+   }catch(err){
+      console.error(err);
+      return res.status(500).json({ message : "Internal Server Error!"});
+   }
+}
+
 export {
     createCollabProject,
     getAllCollabProjects,
-    joinCollabProject
+    joinCollabProject,
+    deleteCollab
 };

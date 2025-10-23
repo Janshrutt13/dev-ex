@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { CollabChat } from "@/components/collab-chat";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
 
 // --- TypeScript Interface for our Collab Project data ---
@@ -29,10 +29,11 @@ interface CollabProject {
   status: 'open' | 'closed' | 'in progress';
 }
 
-export function CollabPost({ project }: { project: CollabProject }) {
+export function CollabPost({ project, onDelete }: { project: CollabProject; onDelete?: (id: string) => void }) {
   const router = useRouter();
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isJoined, setIsJoined] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -73,10 +74,39 @@ export function CollabPost({ project }: { project: CollabProject }) {
     }
   };
 
+  const handleDelete = async () => {
+    if (!confirm('Are you sure you want to delete this collaboration?')) return;
+    setIsDeleting(true);
+    try {
+      const token = localStorage.getItem("token");
+      await axios.delete(`http://localhost:5000/api/collabs/${project._id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success('Collaboration deleted successfully!');
+      if (onDelete) onDelete(project._id);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to delete collaboration');
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <Card className="flex flex-col">
       <CardHeader>
-        <CardTitle>{project.title}</CardTitle>
+        <div className="flex items-start justify-between">
+          <CardTitle>{project.title}</CardTitle>
+          {currentUser?._id === project.author._id && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="text-destructive hover:text-destructive"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
         <CardDescription className="flex items-center pt-2">
             <Avatar className="h-6 w-6 mr-2">
                 <AvatarImage src={project.author.profileImageUrl} />

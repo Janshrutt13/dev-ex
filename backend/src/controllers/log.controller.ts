@@ -66,4 +66,32 @@ const getLogs = async(req : any , res : any) => {
 
 }
 
-export { createLog, getLogs };
+/**
+ * @desc    Delete a log post
+ * @route   DELETE /api/logs/:id
+ * @access  Private
+ */
+
+const deleteLog = async(req : any , res : any) => {
+    try{
+
+       const log = await Log.findById(req.params.id);
+
+       if(!log){
+            return res.status(404).json({message : "Log not found"});
+       }
+
+       if(log.author.toString() !== req.user.id){
+          return res.status(401).json({message : "Unauthorized"});
+       }
+
+       await Log.findByIdAndDelete(req.params.id);
+       res.status(200).json({message : "Log deleted successfully"});
+
+    }catch(err){
+       console.error(err);
+       return res.status(500).json({message : "Internal Server Error"});
+    }
+}
+
+export { createLog, getLogs , deleteLog};
