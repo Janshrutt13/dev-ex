@@ -37,6 +37,10 @@ const LogSchema = new Schema({
             message: 'Invalid image format'
         }
     },
+    likes : [{
+        type : Schema.Types.ObjectId,
+        ref : "User"
+    }],
     dayNumber: { type: Number, min: 1 },
     totalDays: { type: Number, min: 1 }
 } , { timestamps : true });

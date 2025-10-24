@@ -4,6 +4,7 @@ const express = require("express")
 const http = require('http')
 const {Server} = require('socket.io')
 const mongoose = require("mongoose")
+const Message = require('./models/message.models')
 const authRoutes = require("./routes/auth.routes")
 const {startReminderService} = require('./services/reminder.service');
 const passport = require('passport');
@@ -33,8 +34,21 @@ io.on('connection' , (socket: any) => {
    })
 
    //When a user sends a message
-   socket.on('send_message' , (data : any) => {
-    socket.to(data.collabId).emit('recieve_message' , data);
+   socket.on('send_message' , async (data : any) => {
+       try{
+
+        await Message.create({
+           collabRoom : data.collabId,
+           author : data.authorId,
+           username : data.username,
+           message : data.message,
+        });
+         
+        socket.to(data.collabId).emit('recieve_message' , data);
+
+       }catch(err){
+        console.log(err);
+       }
    });
   
    socket.on('disconnect' , () => {

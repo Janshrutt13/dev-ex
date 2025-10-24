@@ -1,6 +1,6 @@
 import express from 'express';
 import { protect } from '../middleware/auth.middleware';
-import { createCollabProject, deleteCollab, getAllCollabProjects, joinCollabProject } from '../controllers/collab.controller';
+import { createCollabProject, deleteCollab, getAllCollabMessages, getAllCollabProjects, joinCollabProject } from '../controllers/collab.controller';
 
 const router = express.Router();
 
@@ -12,5 +12,7 @@ router.post("/" , protect , createCollabProject);
 router.patch("/:id/join" , protect , joinCollabProject);
 
 router.delete("/:id" , protect , deleteCollab);
+
+router.get("/:id/messages" , protect , getAllCollabMessages);
 
 export default router;

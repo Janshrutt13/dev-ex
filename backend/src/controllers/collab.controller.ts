@@ -1,5 +1,6 @@
 import CollabProject from '../models/collab.models';
 import User from '../models/user.model';
+import Message from "../models/message.models";
 
 /**
  * @desc    Create a new collaboration project
@@ -89,7 +90,7 @@ const joinCollabProject = async(req : any , res : any) => {
        }
 
        //Check if user is already a collaborator
-       if(project.collaborators.some(userId)){
+       if(project.collaborators.some((collab: any) => collab.toString() === userId)){
          return res.status(400).json({ message : "You are already a collaborator"});
        }
 
@@ -131,9 +132,26 @@ const deleteCollab = async(req : any , res : any) => {
    }
 }
 
+const getAllCollabMessages = async(req : any , res : any) => {
+     try{
+
+      const messages = await Message.find({
+         collabRoom : req.params.id
+      })
+      .sort({ createdAt : 'asc'});
+
+      res.status(200).json(messages);
+
+     }catch(err){
+        console.error(err);
+        res.status(500).json({ message : "Internal Server Error!"});
+     }
+}
+
 export {
     createCollabProject,
     getAllCollabProjects,
     joinCollabProject,
-    deleteCollab
+    deleteCollab,
+    getAllCollabMessages
 };

@@ -94,4 +94,38 @@ const deleteLog = async(req : any , res : any) => {
     }
 }
 
-export { createLog, getLogs , deleteLog};
+const toggleLike = async(req : any , res : any) => {
+   try{
+
+       const log = await Log.findById(req.params.id);
+       
+       if(!log){
+         return res.status(401).json({ message : "Log not found"});
+       }
+
+       const userId = req.user.id;
+       const likedIndex = log.likes.indexOf(userId);
+
+       if(likedIndex > -1){
+          log.likes.splice(likedIndex, 1);
+       }
+       else{
+         log.likes.push(userId);
+       }
+
+       await log.save();
+
+
+       const populatedLog = await log
+       .populate('author' , 'username profileImageUrl')
+       .populate('likes', 'username');
+
+       res.status(200).json(populatedLog);
+
+   }catch(err){
+      console.error(err);
+      return res.status(500).json({ message : "Internal Server Error"});
+   }
+}
+
+export { createLog, getLogs , deleteLog , toggleLike};

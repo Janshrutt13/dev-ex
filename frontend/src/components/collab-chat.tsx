@@ -24,41 +24,55 @@ interface CollabChatProps {
     currentUser : User
 }
 
-let socket : Socket;
+// Store messages per collab room
+const chatStorage: { [key: string]: Message[] } = {};
+let socket : Socket | null = null;
 
 export function CollabChat({collabId , currentUser} : CollabChatProps){
     const[message , setMessage] = useState('');
-    const[chat, setChat] = useState<Message[]>([]); 
+    const[chat, setChat] = useState<Message[]>(() => chatStorage[collabId] || []); 
 
     useEffect( () => {
-        //Connect to io-server
-        socket = io('http://localhost:5000');
+        //Connect to io-server if not already connected
+        if (!socket) {
+            socket = io('http://localhost:5000');
+        }
 
         //Join the specific room for this collab project
         socket.emit('join_collab_room' , collabId);
 
         //Listen for incoming messages
-        socket.on('recieve_message' , (data : Message) => {
-            setChat((prevChat) => [...prevChat, data]);
-        });
+        const handleMessage = (data : Message) => {
+            setChat((prevChat) => {
+                const newChat = [...prevChat, data];
+                chatStorage[collabId] = newChat;
+                return newChat;
+            });
+        };
+        
+        socket.on('recieve_message' , handleMessage);
 
         //Cleanup
         return() => {
-            socket.disconnect();
+            socket?.off('recieve_message', handleMessage);
         }
     } , [collabId]);
 
     const sendMessage = (e : FormEvent) => {
         e.preventDefault();
 
-        if(message.trim()){
+        if(message.trim() && socket){
             const messageData = {
                collabId,
                username : currentUser.username,
                message
             };
             socket.emit('send_message', messageData);
-            setChat((prevChat) => [...prevChat, messageData]); //Add own Message to chat
+            setChat((prevChat) => {
+                const newChat = [...prevChat, messageData];
+                chatStorage[collabId] = newChat;
+                return newChat;
+            });
             setMessage("");
         }
     }

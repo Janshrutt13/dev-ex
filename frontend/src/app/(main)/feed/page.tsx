@@ -57,6 +57,7 @@ interface Post {
   imageUrl?: string
   dayNumber?: number
   totalDays?: number
+  likesArray?: string[]
 }
 
 interface Collab {
@@ -69,13 +70,20 @@ interface Collab {
 
 const SAMPLE_COLLABS: Collab[] = []
 
-function PostCard({ post, onLike, onDelete, currentUserId }: { post: Post; onLike: (id: string) => void; onDelete: (id: string) => void; currentUserId?: string }) {
+function PostCard({ post, onLike, onDelete, currentUserId }: { post: Post; onLike: (id: string) => Promise<void>; onDelete: (id: string) => void; currentUserId?: string }) {
   const [isLiked, setIsLiked] = useState(post.hasLiked || false)
+  const [likesCount, setLikesCount] = useState(post.reactions.likes)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [isLiking, setIsLiking] = useState(false)
 
-  const handleLike = () => {
-    setIsLiked(!isLiked)
-    onLike(post.id)
+  const handleLike = async () => {
+    if (isLiking) return;
+    setIsLiking(true);
+    const wasLiked = isLiked;
+    setIsLiked(!isLiked);
+    setLikesCount(wasLiked ? likesCount - 1 : likesCount + 1);
+    await onLike(post.id);
+    setIsLiking(false);
   }
 
   const handleDelete = async () => {
@@ -166,7 +174,7 @@ function PostCard({ post, onLike, onDelete, currentUserId }: { post: Post; onLik
             )}
           >
             <Heart className={cn("w-5 h-5", isLiked && "fill-current")} />
-            <span>{post.reactions.likes + (isLiked && !post.hasLiked ? 1 : 0)}</span>
+            <span>{likesCount}</span>
           </button>
           <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
             <Sparkles className="w-5 h-5" />
@@ -258,10 +266,12 @@ export default function DevExPlatform() {
             streak: log.author.streak ? log.author.streak.length : 0,
             timestamp: new Date(log.createdAt).toLocaleDateString(),
             reactions: {
-              likes: 0,
+              likes: log.likes?.length || 0,
               encourages: 0,
               comments: 0
             },
+            hasLiked: log.likes?.includes(userResponse.data._id),
+            likesArray: log.likes || [],
             hashtags: log.tags || [],
             imageUrl: log.imageUrl
           }));
@@ -278,12 +288,30 @@ export default function DevExPlatform() {
     fetchPosts();
   }, []);
 
-  const handleLike = (postId: string) => {
-    setPosts(posts.map(post => 
-      post.id === postId 
-        ? { ...post, hasLiked: !post.hasLiked }
-        : post
-    ))
+  const handleLike = async (postId: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.patch(
+        `http://localhost:5000/api/logs/${postId}/like`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      // Update the post with new like data
+      setPosts(posts.map(post => 
+        post.id === postId 
+          ? { 
+              ...post, 
+              reactions: { ...post.reactions, likes: response.data.likes.length },
+              hasLiked: response.data.likes.includes(currentUserId),
+              likesArray: response.data.likes
+            }
+          : post
+      ));
+    } catch (error) {
+      console.error('Failed to like post:', error);
+      toast.error('Failed to like post');
+    }
   }
 
   const handleDelete = async (postId: string) => {
