@@ -232,10 +232,7 @@ export function CollabPost({ project, currentUser, onDelete, onProjectUpdate }: 
         <DialogContent className="max-w-lg w-full p-0 overflow-hidden">
           <CollabChat 
             collabId={project._id}
-            currentUser={{
-              username: currentUser?.username || "",
-              profileImageUrl: currentUser?.profileImageUrl || ""
-            }}
+            currentUser={currentUser || { _id: '', username: '', profileImageUrl: '' }}
           />
         </DialogContent>
       </Dialog>

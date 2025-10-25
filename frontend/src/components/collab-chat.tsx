@@ -2,12 +2,14 @@
 
 import { useState, useEffect, FormEvent } from "react";
 import io, { Socket } from "socket.io-client";
+import axios from "axios";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { set } from "react-hook-form";
+import { useRef } from "react";
 
 interface Message {
     username : string,
@@ -28,90 +30,90 @@ interface CollabChatProps {
 const chatStorage: { [key: string]: Message[] } = {};
 let socket : Socket | null = null;
 
-export function CollabChat({collabId , currentUser} : CollabChatProps){
-    const[message , setMessage] = useState('');
-    const[chat, setChat] = useState<Message[]>(() => chatStorage[collabId] || []); 
+export function CollabChat({collabId, currentUser}: CollabChatProps) {
+  const [message, setMessage] = useState('');
+  const [chat, setChat] = useState<Message[]>([]);
+  const [loading, setLoading] = useState(true);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-    useEffect( () => {
-        //Connect to io-server if not already connected
-        if (!socket) {
-            socket = io('http://localhost:5000');
-        }
+  useEffect(() => {
+    const fetchMessages = async () => {
+      setLoading(true);
+      try {
+        const token = localStorage.getItem('token');
+        const res = await axios.get(`http://localhost:5000/api/collabs/${collabId}/messages`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setChat(res.data || []);
+      } catch {
+        setChat([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchMessages();
 
-        //Join the specific room for this collab project
-        socket.emit('join_collab_room' , collabId);
-
-        //Listen for incoming messages
-        const handleMessage = (data : Message) => {
-            setChat((prevChat) => {
-                const newChat = [...prevChat, data];
-                chatStorage[collabId] = newChat;
-                return newChat;
-            });
-        };
-        
-        socket.on('recieve_message' , handleMessage);
-
-        //Cleanup
-        return() => {
-            socket?.off('recieve_message', handleMessage);
-        }
-    } , [collabId]);
-
-    useEffect(() => {
-        // Load chat history from localStorage
-        const saved = typeof window !== 'undefined'
-            ? localStorage.getItem('collab_chat_' + collabId)
-            : null;
-        if (saved) {
-            setChat(JSON.parse(saved));
-            chatStorage[collabId] = JSON.parse(saved);
-        }
-    }, [collabId]);
-
-    useEffect(() => {
-        // Save chat history on change
-        if (typeof window !== 'undefined') {
-            localStorage.setItem('collab_chat_' + collabId, JSON.stringify(chat));
-        }
-    }, [collabId, chat]);
-
-    const sendMessage = (e : FormEvent) => {
-        e.preventDefault();
-
-        if(message.trim() && socket){
-            const messageData = {
-               collabId,
-               username : currentUser.username,
-               message
-            };
-            socket.emit('send_message', messageData);
-            setChat((prevChat) => {
-                const newChat = [...prevChat, messageData];
-                chatStorage[collabId] = newChat;
-                return newChat;
-            });
-            setMessage("");
-        }
+    if (!socket) {
+      socket = io('http://localhost:5000');
     }
-    return (
+    socket.emit('join_collab_room', collabId);
+    const handleMessage = (data: Message) => {
+      setChat((prevChat) => [...prevChat, data]);
+    };
+    socket.on('recieve_message', handleMessage);
+    return () => {
+      socket?.off('recieve_message', handleMessage);
+    };
+  }, [collabId]);
+
+  // Auto-scroll to bottom on chat update
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [chat, loading]);
+
+  const sendMessage = (e: FormEvent) => {
+    e.preventDefault();
+    if (message.trim() && socket) {
+      const messageData = {
+        collabId,
+        username: currentUser.username,
+        authorId: (currentUser as any)._id, // fix: send required authorId to backend
+        message
+      };
+      socket.emit('send_message', messageData);
+      setChat((prevChat) => [...prevChat, messageData]); // Optimistic update
+      setMessage("");
+    }
+  };
+
+  return (
     <Card className="flex flex-col h-[500px]">
       <CardHeader>
         <h3 className="font-semibold">Project Discussion</h3>
       </CardHeader>
       <CardContent className="flex-1 overflow-hidden">
         <ScrollArea className="h-full pr-4">
-          {chat.map((msg, index) => (
-            <div key={index} className="flex items-start gap-3 mb-4">
-              <Avatar className="h-8 w-8">
-                <AvatarFallback>{msg.username[0].toUpperCase()}</AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col">
-                <span className="font-semibold text-sm">{msg.username}</span>
-                <p className="text-sm text-muted-foreground">{msg.message}</p>
+          <div ref={scrollRef} style={{height:'100%', overflowY:'auto'}}>
+          {loading ? (
+            <div className="text-center text-muted-foreground py-12">Loading chat…</div>
+          ) : chat.length === 0 ? (
+            <div className="text-center text-muted-foreground py-12">No messages yet.</div>
+          ) : (
+            chat.map((msg, index) => (
+              <div key={index} className="flex items-start gap-3 mb-4">
+                <Avatar className="h-8 w-8">
+                  <AvatarFallback>{msg.username[0].toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col">
+                  <span className="font-semibold text-sm">{msg.username}</span>
+                  <p className="text-sm text-muted-foreground">{msg.message}</p>
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
+          </div>
         </ScrollArea>
       </CardContent>
       <CardFooter>

@@ -142,7 +142,7 @@ const manageRequests = async(req : any , res : any) => {
       }
 
       await project.save();
-      const updatedProject = populateProject(project);
+      const updatedProject = await populateProject(project);
       res.status(200).json(updatedProject);
 
    }catch(err){
