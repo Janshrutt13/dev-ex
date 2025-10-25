@@ -189,10 +189,4 @@ dev-ex/
 ## 🗺️ Future Roadmap
 
 - **GitHub-Style Streak Calendar**: A visual calendar on user profiles showing their logging consistency
-- **Email Reminders**: A node-cron job to send daily emails to users to maintain their streak
-- **Full Profile Pages**: Viewable user profiles showing their logs, projects, and streak
-- **In-App Messaging**: Allow collaborators to chat directly
-
-## 📄 License
-
-This project is licensed under the MIT License. See the LICENSE file for details.
+- **Trending Collab Section**: Shows trending collabs which users can join
