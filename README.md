@@ -1,6 +1,14 @@
 <div align="center">
   <h1>Dev-Ex 🚀</h1>
   <p>A full-stack code logging platform for developers to build discipline, track progress, and find collaborators.</p>
+  <p><b>Recent Updates (Oct 2025):</b>
+  <ul align="left">
+    <li>Collaboration chat available to all members via chat icon (modal)</li>
+    <li>Pending Approvals visible only to project author</li>
+    <li>Member and applicant usernames link to profile</li>
+    <li>Chat history persists per collaboration</li>
+  </ul>
+  </p>
   
   <p>
     <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js">
@@ -14,7 +22,7 @@
 
 ## About
 
-Dev-Ex is a platform built for developers who want to stay consistent. Whether you're taking on a 75-day or 100-day coding challenge or just want to log your daily work, Dev-Ex helps you maintain your streak. It also features a dedicated section for finding project collaborators.
+Dev-Ex is a platform built for developers who want to stay consistent. Whether you're taking on a 75-day or 100-day coding challenge or just want to log your daily work, Dev-Ex helps you maintain your streak. It also features a dedicated section for finding project collaborators. <b>Collaboration chat is available to all team members via the project card's chat icon, with a persistent chat history and author-only pending approvals management built into the UI.</b>
 
 ## ✨ Core Features
 
@@ -26,6 +34,9 @@ Dev-Ex is a platform built for developers who want to stay consistent. Whether y
 - **Secure Authentication**: Full authentication flow with JWT (email/password) and OAuth 2.0 (GitHub)
 - **Modern UI/UX**: A sleek, collapsible sidebar layout built with shadcn/ui and Tailwind CSS
 - **Dark & Light Mode**: Seamless theme switching based on your system preference or manual toggle
+- **Collaboration Chat (NEW):** Project chat is accessible via a chat icon/modal on each collab post, available to all approved members and the author. Chat history is persistent in-browser per project.
+- **Author-Only Pending Approvals:** The project author can see and manage join requests in a dedicated 'Pending Approvals' tab beside the member list.
+- **Clickable Profile Links:** All members and applicants are linked to their user profiles for fast navigation.
 
 ## 💻 Tech Stack
 
