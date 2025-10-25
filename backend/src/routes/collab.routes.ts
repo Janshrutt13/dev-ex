@@ -1,6 +1,8 @@
 import express from 'express';
 import { protect } from '../middleware/auth.middleware';
-import { createCollabProject, deleteCollab, getAllCollabMessages, getAllCollabProjects, joinCollabProject } from '../controllers/collab.controller';
+import { createCollabProject, deleteCollab, getAllCollabMessages, getAllCollabProjects, joinCollabProject 
+    , manageRequests, removeCollaborator
+ } from '../controllers/collab.controller';
 
 const router = express.Router();
 
@@ -15,4 +17,8 @@ router.delete("/:id" , protect , deleteCollab);
 
 router.get("/:id/messages" , protect , getAllCollabMessages);
 
-export default router;
+router.patch("/:id/manage" , protect , manageRequests);
+
+router.patch("/:id/remove" , protect , removeCollaborator);
+
+export default router

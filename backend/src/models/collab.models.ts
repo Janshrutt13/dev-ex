@@ -30,7 +30,11 @@ const CollabProjectSchema = new Schema({
     url : {
         type : String,
         trim : true
-    }
+    },
+    pendingRequests : [{
+        type : Schema.Types.ObjectId,
+        ref : "User"
+    }]
 } , { timestamps : true });
 
 export default mongoose.model("CollabProject", CollabProjectSchema);

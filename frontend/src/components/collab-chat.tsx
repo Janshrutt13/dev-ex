@@ -58,6 +58,24 @@ export function CollabChat({collabId , currentUser} : CollabChatProps){
         }
     } , [collabId]);
 
+    useEffect(() => {
+        // Load chat history from localStorage
+        const saved = typeof window !== 'undefined'
+            ? localStorage.getItem('collab_chat_' + collabId)
+            : null;
+        if (saved) {
+            setChat(JSON.parse(saved));
+            chatStorage[collabId] = JSON.parse(saved);
+        }
+    }, [collabId]);
+
+    useEffect(() => {
+        // Save chat history on change
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('collab_chat_' + collabId, JSON.stringify(chat));
+        }
+    }, [collabId, chat]);
+
     const sendMessage = (e : FormEvent) => {
         e.preventDefault();
 

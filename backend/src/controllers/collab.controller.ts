@@ -1,6 +1,16 @@
 import CollabProject from '../models/collab.models';
 import User from '../models/user.model';
-import Message from "../models/message.models";
+const Message = require('../models/message.models');
+
+
+//Helper function to repopulate a project with necessary fields
+const populateProject = (project : any) => {
+  return project.populate([
+    { path: 'author', select: 'username profileImageUrl' },
+    { path: 'collaborators', select: 'username profileImageUrl' },
+    { path: 'pendingRequests', select: 'username profileImageUrl' }
+  ]);
+};
 
 /**
  * @desc    Create a new collaboration project
@@ -50,6 +60,7 @@ const getAllCollabProjects = async(req : any , res : any) => {
         const collabs = await CollabProject.find({ status : 'open'})
         .populate('author', 'username profileImageUrl')
         .populate('collaborators' , 'username profileImageUrl')
+        .populate('pendingRequests' , 'username profileImageUrl')
         .sort({ createdAt : -1});
 
 
@@ -94,13 +105,15 @@ const joinCollabProject = async(req : any , res : any) => {
          return res.status(400).json({ message : "You are already a collaborator"});
        }
 
-       //Add collaborator to the project
-       project.collaborators.push(userId);
+       if(project.pendingRequests.some(p => p.toString() === userId)){
+          return res.status(400).json({ message : "You have already requested to join this project"});
+       }
+
+       //Add user to pending requests
+       project.pendingRequests.push(userId);
        await project.save();
 
-       const updatedProject = await CollabProject.findById(project._id)
-       .populate('author' , 'username profileImageUrl')
-       .populate('collaborators', 'username profileImageUrl');
+       const updatedProject = await populateProject(project)
 
        res.status(200).json(updatedProject);
        
@@ -108,6 +121,56 @@ const joinCollabProject = async(req : any , res : any) => {
         console.error(err);
         return res.status(500).json({ message : "Internal Server Error"});
     }
+}
+
+const manageRequests = async(req : any , res : any) => {
+   try{
+   
+      const {applicantId , action} = req.body;
+      const project =  await CollabProject.findById(req.params.id);
+
+      if(!project?.author.equals(req.user.id)){
+        return res.status(401).json({ message : "Unauthorized"});
+      }
+
+      project.pendingRequests = project.pendingRequests.filter((id: any) => id.toString() !== applicantId);
+
+      if(action === 'accept'){
+         if(!project.collaborators.includes(applicantId)){
+           project.collaborators.push(applicantId);
+         }
+      }
+
+      await project.save();
+      const updatedProject = populateProject(project);
+      res.status(200).json(updatedProject);
+
+   }catch(err){
+      console.error(err);
+      return res.status(500).json({ message : "Internal Server Error!"});
+   }
+};
+
+const removeCollaborator = async(req : any , res : any) => {
+  try{
+
+    const {memberId} = req.body;
+    const project = await CollabProject.findById(req.params.id);
+
+    if(!project?.author.equals(req.user.id)){
+      return res.status(401).json({ message : "Not Authorized"});
+    }
+
+    project.collaborators = project.collaborators.filter((id: any) => id.toString() !== memberId);
+    await project.save();
+
+    const updatedProject = await populateProject(project);
+    res.status(200).json(updatedProject);
+
+  }catch(err){
+    console.error(err);
+    return res.status(500).json({ message : "Internal Server Error!"});
+  }
 }
 
 const deleteCollab = async(req : any , res : any) => {
@@ -135,6 +198,18 @@ const deleteCollab = async(req : any , res : any) => {
 const getAllCollabMessages = async(req : any , res : any) => {
      try{
 
+      const project = await CollabProject.findById(req.params.id);
+      if (!project) {
+        return res.status(404).json({ message: 'Project not found' });
+      }
+
+      const userId = req.user.id;
+      const isMember = project.author.toString() === userId || project.collaborators.some((c: any) => c.toString() === userId);
+
+      if (!isMember) {
+        return res.status(401).json({ message: 'You are not a member of this project' });
+      }
+
       const messages = await Message.find({
          collabRoom : req.params.id
       })
@@ -148,10 +223,14 @@ const getAllCollabMessages = async(req : any , res : any) => {
      }
 }
 
+
+
 export {
     createCollabProject,
     getAllCollabProjects,
     joinCollabProject,
     deleteCollab,
-    getAllCollabMessages
+    getAllCollabMessages,
+    manageRequests,
+    removeCollaborator
 };

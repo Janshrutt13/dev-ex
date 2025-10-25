@@ -25,6 +25,7 @@ interface CollabProject {
   description: string;
   requiredSkills: string[];
   collaborators: User[];
+  pendingRequests: User[];
   status: "open" | "closed" | "in progress";
   link?: string; // Add optional link
 }
@@ -48,7 +49,8 @@ export default function CollabPage() {
   const [projects, setProjects] = useState<CollabProject[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
+  const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const router = useRouter();
 
 
@@ -93,7 +95,11 @@ export default function CollabPage() {
     router.push('/collab/create');
   };
 
-
+  const handleProjectUpdate = (updatedProject: CollabProject) => {
+    setProjects(projects =>
+      projects.map(p => p._id === updatedProject._id ? updatedProject : p)
+    );
+  }
 
   if (isLoading) {
     return (
@@ -123,7 +129,9 @@ export default function CollabPage() {
               <CollabPost 
                 key={project._id} 
                 project={project} 
+                currentUser={currentUser}
                 onDelete={(id) => setProjects(projects.filter(p => p._id !== id))}
+                onProjectUpdate={handleProjectUpdate}
               />
             ))}
           </div>
