@@ -5,23 +5,9 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import {
-  Home,
-  Users,
-  User,
-  Trophy,
   Plus,
   Flame,
   Heart,
-  MessageCircle,
-  MoreHorizontal,
-  Moon,
-  Sun,
-  Code2,
-  Search,
-  Bell,
-  Send,
-  Sparkles,
-  X,
   Trash2,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -98,23 +84,23 @@ function PostCard({ post, onLike, onDelete, currentUserId }: { post: Post; onLik
       animate={{ opacity: 1, y: 0 }}
       className="bg-background border border-border rounded-2xl p-6 hover:border-primary/20 transition-all duration-300"
     >
-      <div className="flex items-start gap-3 mb-4">
-        <Avatar className="w-12 h-12">
+      <div className="flex items-start gap-2 sm:gap-3 mb-4">
+        <Avatar className="w-10 h-10 sm:w-12 sm:h-12">
           <AvatarImage src={post.user.avatar} alt={post.user.name} />
           <AvatarFallback>{post.user.name?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
         </Avatar>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-semibold text-foreground">{post.user.name}</span>
-            <span className="text-sm text-muted-foreground">{post.user.username}</span>
+          <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+            <span className="font-semibold text-sm sm:text-base text-foreground">{post.user.name}</span>
+            <span className="text-xs sm:text-sm text-muted-foreground">{post.user.username}</span>
             <Badge variant="secondary" className="text-xs">
               {post.challenge}
             </Badge>
           </div>
-          <div className="flex items-center gap-2 mt-1">
-            <Flame className="w-4 h-4 text-orange-500" />
-            <span className="text-sm font-medium text-orange-500">{post.streak} day streak</span>
-            <span className="text-sm text-muted-foreground">• {post.timestamp}</span>
+          <div className="flex items-center gap-1 sm:gap-2 mt-1 flex-wrap">
+            <Flame className="w-3 h-3 sm:w-4 sm:h-4 text-orange-500" />
+            <span className="text-xs sm:text-sm font-medium text-orange-500">{post.streak} day streak</span>
+            <span className="text-xs sm:text-sm text-muted-foreground">• {post.timestamp}</span>
           </div>
         </div>
         {currentUserId === post.user.id && (
@@ -130,11 +116,11 @@ function PostCard({ post, onLike, onDelete, currentUserId }: { post: Post; onLik
         )}
       </div>
 
-      <p className="text-foreground leading-relaxed">{post.content}</p>
+      <p className="text-sm sm:text-base text-foreground leading-relaxed break-words">{post.content}</p>
 
       {post.codeSnippet && (
-        <pre className="bg-muted/50 border border-border rounded-lg p-4 mt-4 overflow-x-auto">
-          <code className="text-sm font-mono text-foreground">{post.codeSnippet}</code>
+        <pre className="bg-muted/50 border border-border rounded-lg p-2 sm:p-4 mt-4 overflow-x-auto">
+          <code className="text-xs sm:text-sm font-mono text-foreground">{post.codeSnippet}</code>
         </pre>
       )}
 
@@ -164,8 +150,8 @@ function PostCard({ post, onLike, onDelete, currentUserId }: { post: Post; onLik
         </div>
       )}
 
-      <div className="flex items-center justify-between pt-4 border-t border-border">
-        <div className="flex items-center gap-6">
+      <div className="flex items-center justify-between pt-4 border-t border-border mt-4">
+        <div className="flex items-center gap-3 sm:gap-6">
           <button
             onClick={handleLike}
             className={cn(
@@ -176,14 +162,7 @@ function PostCard({ post, onLike, onDelete, currentUserId }: { post: Post; onLik
             <Heart className={cn("w-5 h-5", isLiked && "fill-current")} />
             <span>{likesCount}</span>
           </button>
-          <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-            <Sparkles className="w-5 h-5" />
-            <span>{post.reactions.encourages}</span>
-          </button>
-          <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-            <MessageCircle className="w-5 h-5" />
-            <span>{post.reactions.comments}</span>
-          </button>
+
         </div>
         
         {/* Challenge Badge */}
@@ -337,34 +316,20 @@ export default function DevExPlatform() {
 
 
           {/* Main Feed */}
-          <main className="max-w-2xl mx-auto space-y-6">
+          <main className="w-full max-w-2xl mx-auto space-y-4 sm:space-y-6 px-2 sm:px-0">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-bold text-foreground">Feed</h1>
-              </div>
-              <div className="flex items-center gap-2">
-                <button className="p-2 hover:bg-muted rounded-full transition-colors">
-                  <Search className="w-5 h-5 text-muted-foreground" />
-                </button>
-                <button className="p-2 hover:bg-muted rounded-full transition-colors">
-                  <Bell className="w-5 h-5 text-muted-foreground" />
-                </button>
-              </div>
+              <h1 className="text-xl sm:text-2xl font-bold text-foreground">Feed</h1>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {isLoading ? (
                 <div className="text-center py-12">
-                  <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                    <MessageCircle className="w-8 h-8 text-muted-foreground animate-pulse" />
-                  </div>
+                 
                   <p className="text-muted-foreground">Loading posts...</p>
                 </div>
               ) : posts.length === 0 ? (
                 <div className="text-center py-12">
-                  <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                    <MessageCircle className="w-8 h-8 text-muted-foreground" />
-                  </div>
+                  
                   <h3 className="text-lg font-semibold text-foreground mb-2">No posts yet</h3>
                   <p className="text-muted-foreground mb-4">Be the first to share your coding progress!</p>
                   <Button onClick={() => {
@@ -403,7 +368,7 @@ export default function DevExPlatform() {
           }
           router.push('/feed/create');
         }}
-        className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-br from-indigo-500 to-cyan-500 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center z-40"
+        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-indigo-500 to-cyan-500 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center z-40"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
       >
