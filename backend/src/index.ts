@@ -22,13 +22,13 @@ const io = new Server(server, {
     }
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT: number = Number(process.env.PORT) || 5000;
 
-io.on('connection' , (socket: any) => {
-   console.log('A user connected' , socket.id);
+io.on('connection', (socket: import('socket.io').Socket) => {
+   console.log('A user connected', socket.id);
 
-   //When a user joins a specific project chat
-   socket.on('join_collab_room', (collabId : any) => {
+   // When a user joins a specific project chat
+   socket.on('join_collab_room', (collabId: string) => {
      socket.join(collabId);
      console.log(`User ${socket.id} joined room ${collabId}`);
    })
