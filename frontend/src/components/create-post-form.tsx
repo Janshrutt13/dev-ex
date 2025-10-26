@@ -24,7 +24,7 @@ export async function CreatePostForm({user}:{user : { name : string}}) {
           const token = localStorage.getItem("token");
           if(!token) throw new Error("Token not found");
 
-          await axios.post("http://localhost:5000/api/logs",
+          await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/logs`,
             {content},
             {headers : {Authorization : `Bearer${token}`}}
           );

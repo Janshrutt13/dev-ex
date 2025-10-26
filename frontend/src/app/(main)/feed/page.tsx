@@ -221,10 +221,10 @@ export default function DevExPlatform() {
         const token = localStorage.getItem('token');
         if (token) {
           const [logsResponse, userResponse] = await Promise.all([
-            axios.get('http://localhost:5000/api/logs', {
+            axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/logs`, {
               headers: { Authorization: `Bearer ${token}` }
             }),
-            axios.get('http://localhost:5000/api/users/me', {
+            axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/users/me`, {
               headers: { Authorization: `Bearer ${token}` }
             })
           ]);
@@ -271,7 +271,7 @@ export default function DevExPlatform() {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.patch(
-        `http://localhost:5000/api/logs/${postId}/like`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/logs/${postId}/like`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -296,7 +296,7 @@ export default function DevExPlatform() {
   const handleDelete = async (postId: string) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:5000/api/logs/${postId}`, {
+      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/api/logs/${postId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setPosts(posts.filter(post => post.id !== postId));

@@ -24,7 +24,7 @@ export default function CreateCollabPage() {
       const token = localStorage.getItem('token');
       if (token) {
         try {
-          const response = await axios.get('http://localhost:5000/api/users/me', {
+          const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/users/me`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           setCurrentUser(response.data);
@@ -54,7 +54,7 @@ export default function CreateCollabPage() {
       const requiredSkills = skills.split(',').map(s => s.trim()).filter(Boolean);
       
       await axios.post(
-        'http://localhost:5000/api/collabs',
+        `${process.env.NEXT_PUBLIC_API_URL}/api/collabs`,
         { title, description, url, requiredSkills },
         { headers: { Authorization: `Bearer ${token}` } }
       );

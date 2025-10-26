@@ -33,7 +33,7 @@ interface CollabProject {
 // Func to fetch collab projects
 async function getCollabProject(): Promise<CollabProject[]> {
   try {
-    const res = await fetch(`http://localhost:5000/api/collabs`, { cache: "no-store" });
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/collabs`, { cache: "no-store" });
     if (!res.ok) {
       return [];
     }
@@ -72,7 +72,7 @@ export default function CollabPage() {
         // Fetch projects and user data in parallel
         const [projectsData, userData] = await Promise.all([
           getCollabProject(),
-          axios.get("http://localhost:5000/api/users/me", {
+          axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/users/me`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);

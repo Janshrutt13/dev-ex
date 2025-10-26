@@ -41,7 +41,7 @@ export function CollabChat({collabId, currentUser}: CollabChatProps) {
       setLoading(true);
       try {
         const token = localStorage.getItem('token');
-        const res = await axios.get(`http://localhost:5000/api/collabs/${collabId}/messages`, {
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/collabs/${collabId}/messages`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setChat(res.data || []);
@@ -54,7 +54,7 @@ export function CollabChat({collabId, currentUser}: CollabChatProps) {
     fetchMessages();
 
     if (!socket) {
-      socket = io('http://localhost:5000');
+      socket = io(`${process.env.NEXT_PUBLIC_API_URL}`);
     }
     socket.emit('join_collab_room', collabId);
     const handleMessage = (data: Message) => {

@@ -29,7 +29,7 @@ interface CollabProject {
   description: string;
   requiredSkills: string[];
   collaborators: User[];
-  pendingRequests: User[]; // <-- ADDED
+  pendingRequests: User[]; 
   status: 'open' | 'closed' | 'in progress';
 }
 
@@ -38,7 +38,7 @@ interface CollabPostProps {
   project: CollabProject;
   currentUser: User | null;
   onDelete: (projectId: string) => void;
-  onProjectUpdate: (updatedProject: CollabProject) => void; // <-- ADDED
+  onProjectUpdate: (updatedProject: CollabProject) => void; 
 }
 
 export function CollabPost({ project, currentUser, onDelete, onProjectUpdate }: CollabPostProps) {
@@ -58,7 +58,7 @@ export function CollabPost({ project, currentUser, onDelete, onProjectUpdate }: 
   const handleJoin = async () => {
     try {
       const res = await axios.patch(
-        `http://localhost:5000/api/collabs/${project._id}/join`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/collabs/${project._id}/join`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -73,7 +73,7 @@ export function CollabPost({ project, currentUser, onDelete, onProjectUpdate }: 
   const handleManageRequest = async (applicantId: string, action: "accept" | "reject") => {
     try {
       const res = await axios.patch(
-        `http://localhost:5000/api/collabs/${project._id}/manage`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/collabs/${project._id}/manage`,
         { applicantId, action },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -88,7 +88,7 @@ export function CollabPost({ project, currentUser, onDelete, onProjectUpdate }: 
   const handleRemoveCollaborator = async (memberId: string) => {
     try {
       const res = await axios.patch(
-        `http://localhost:5000/api/collabs/${project._id}/remove`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/collabs/${project._id}/remove`,
         { memberId },
         { headers: { Authorization: `Bearer ${token}` } }
       );

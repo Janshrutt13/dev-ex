@@ -23,7 +23,7 @@ export default function CreateFeedPage() {
       const token = localStorage.getItem('token');
       if (token) {
         try {
-          const response = await axios.get('http://localhost:5000/api/users/me', {
+          const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/users/me`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           setCurrentUser(response.data);
@@ -81,7 +81,7 @@ export default function CreateFeedPage() {
       }
       
       await axios.post(
-        'http://localhost:5000/api/logs',
+        `${process.env.NEXT_PUBLIC_API_URL}/api/logs`,
         formData,
         { 
           headers: { 
